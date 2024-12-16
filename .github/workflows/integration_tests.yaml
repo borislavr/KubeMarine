@@ -11,7 +11,7 @@ jobs:
       kuber_versions: ${{ steps.versions.outputs.kuber_versions }}
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python 3.12
         uses: actions/setup-python@v4
         with:
@@ -38,7 +38,7 @@ jobs:
         kubernetes-version: ${{ fromJSON(needs.collect_kubernetes_versions.outputs.kuber_versions) }}
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Check ips
         run: ip a
       - name: Ssh preparation
@@ -98,7 +98,7 @@ jobs:
       cluster_yaml_file: ./ci/extended_cluster.yaml
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Check ips
         run: ip a
       - name: Ssh preparation
@@ -157,7 +157,7 @@ jobs:
   thirdparties_sync:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
         with:
           python-version: "3.12"
