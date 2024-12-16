@@ -171,7 +171,7 @@ jobs:
         run: zip -r package.zip dist
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           draft: false
           prerelease: true
@@ -203,7 +203,7 @@ jobs:
         run: mv kubemarine${{ matrix.ext }} kubemarine-${{ matrix.arch }}${{ matrix.ext }}
 
       - name: Upload Release Asset
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           # Since the release already exists, the following does not change it, but only uploads the artifact.
           files: |
