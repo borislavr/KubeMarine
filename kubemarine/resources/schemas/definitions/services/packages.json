@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema",
   "type": "object",
   "description": "Section for packages and their management",
-  "allOf": [{"$ref": "#/definitions/CustomPackages"}],
+  "allOf": [{ "$ref": "#/definitions/CustomPackages" }],
   "properties": {
     "package_manager": {
       "type": "object",
@@ -16,9 +16,9 @@
         "repositories": {
           "description": "List of new repositories. Can be specified as path to the file containing repositories, or as list for apt repositories, or as dictionary for yum repositories.",
           "oneOf": [
-            {"type": "string"},
-            {"$ref": "#/definitions/YumRepositories"},
-            {"$ref": "#/definitions/AptRepositories"}
+            { "type": "string" },
+            { "$ref": "#/definitions/YumRepositories" },
+            { "$ref": "#/definitions/AptRepositories" }
           ]
         }
       },
@@ -28,13 +28,13 @@
       "type": "object",
       "description": "Specify whether to install or skip mandatory packages",
       "properties": {
-        "conntrack": {"type": "boolean", "default": true},
-        "iptables": {"type": "boolean", "default": true},
-        "openssl": {"type": "boolean", "default": true},
-        "curl": {"type": "boolean", "default": true},
-        "unzip": {"type": "boolean", "default": true},
-        "semanage": {"type": "boolean", "default": true},
-        "kmod": {"type": "boolean", "default": true}
+        "conntrack": { "type": "boolean", "default": true },
+        "iptables": { "type": "boolean", "default": true },
+        "openssl": { "type": "boolean", "default": true },
+        "curl": { "type": "boolean", "default": true },
+        "unzip": { "type": "boolean", "default": true },
+        "semanage": { "type": "boolean", "default": true },
+        "kmod": { "type": "boolean", "default": true }
       },
       "additionalProperties": false
     },
@@ -50,8 +50,15 @@
   },
   "propertyNames": {
     "anyOf": [
-      {"$ref": "#/definitions/CustomPackagesPropertyNames"},
-      {"enum": ["package_manager", "mandatory", "associations", "cache_versions"]}
+      { "$ref": "#/definitions/CustomPackagesPropertyNames" },
+      {
+        "enum": [
+          "package_manager",
+          "mandatory",
+          "associations",
+          "cache_versions"
+        ]
+      }
     ]
   },
   "definitions": {
@@ -62,7 +69,7 @@
           "oneOf": [
             {
               "type": "object",
-              "allOf": [{"$ref": "#/definitions/IncludeExcludeProperties"}],
+              "allOf": [{ "$ref": "#/definitions/IncludeExcludeProperties" }],
               "required": ["include"],
               "propertyNames": {
                 "$ref": "#/definitions/IncludeExcludePropertyNames"
@@ -76,15 +83,19 @@
         "upgrade": {
           "description": "List of custom packages to upgrade. Can be specified as list or as two lists that are to be included and excluded during processing.",
           "oneOf": [
-            {"$ref": "#/definitions/IncludeExcludePermissive"},
-            {"$ref": "../common/utils.json#/definitions/MergeableSetOfStrings"}
+            { "$ref": "#/definitions/IncludeExcludePermissive" },
+            {
+              "$ref": "../common/utils.json#/definitions/MergeableSetOfStrings"
+            }
           ]
         },
         "remove": {
           "description": "List of custom packages to remove. Can be specified as list or as two lists that are to be included and excluded during processing.",
           "oneOf": [
-            {"$ref": "#/definitions/IncludeExcludePermissive"},
-            {"$ref": "../common/utils.json#/definitions/MergeableSetOfStrings"}
+            { "$ref": "#/definitions/IncludeExcludePermissive" },
+            {
+              "$ref": "../common/utils.json#/definitions/MergeableSetOfStrings"
+            }
           ]
         }
       }
@@ -97,10 +108,10 @@
       "additionalProperties": {
         "type": "object",
         "properties": {
-          "name": {"type": "string"},
-          "enabled": {"type": "integer"},
-          "gpgcheck": {"type": "integer"},
-          "baseurl": {"type": "string"}
+          "name": { "type": "string" },
+          "enabled": { "type": "integer" },
+          "gpgcheck": { "type": "integer" },
+          "baseurl": { "type": "string" }
         }
       }
     },
@@ -109,7 +120,7 @@
     },
     "IncludeExcludePermissive": {
       "type": "object",
-      "allOf": [{"$ref": "#/definitions/IncludeExcludeProperties"}],
+      "allOf": [{ "$ref": "#/definitions/IncludeExcludeProperties" }],
       "minProperties": 1,
       "propertyNames": {
         "$ref": "#/definitions/IncludeExcludePropertyNames"

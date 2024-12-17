@@ -5,14 +5,16 @@
     "pss": {
       "type": "object",
       "description": "PSS configuration section",
-      "allOf": [{"$ref": "definitions/rbac/pss.json#/definitions/Properties"}],
+      "allOf": [
+        { "$ref": "definitions/rbac/pss.json#/definitions/Properties" }
+      ],
       "properties": {
         "namespaces": {
           "type": "array",
           "description": "List of namespaces that will be labeled during the maintenance procedure. Each item can be either a namespace name, or dictionary where key is a namespace name and values are profile labels.",
           "items": {
             "oneOf": [
-              {"type": "string"},
+              { "type": "string" },
               {
                 "type": "object",
                 "additionalProperties": {
@@ -32,8 +34,8 @@
       "required": ["pod-security"],
       "propertyNames": {
         "anyOf": [
-          {"$ref": "definitions/rbac/pss.json#/definitions/PropertyNames"},
-          {"enum": ["namespaces", "namespaces_defaults"]}
+          { "$ref": "definitions/rbac/pss.json#/definitions/PropertyNames" },
+          { "enum": ["namespaces", "namespaces_defaults"] }
         ]
       }
     },

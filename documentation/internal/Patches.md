@@ -14,23 +14,25 @@ Patches are installed during specific [Kubemarine migration procedure](/document
 
 ## How to Write Your Own Patch
 
-Patches are registered in a special folder [/kubemarine/patches](/kubemarine/patches).  
+Patches are registered in a special folder [/kubemarine/patches](/kubemarine/patches).
 
 Every patch should inherit one of:
-* `kubemarine.core.patch.InventoryOnlyPatch`
-   This may change the inventory.
-   Calling `DynamicResources.cluster(EnrichmentStage.LIGHT)` is allowed to connect to nodes for read-only aims.
-   Patches if this type are executed first.
-* `kubemarine.core.patch.RegularPatch`. This accesses and makes some operations on the cluster.
-   These patches should not upgrade software, and should not affect the upgrade procedure.
-   Patches if this type are executed last.
+
+- `kubemarine.core.patch.InventoryOnlyPatch`
+  This may change the inventory.
+  Calling `DynamicResources.cluster(EnrichmentStage.LIGHT)` is allowed to connect to nodes for read-only aims.
+  Patches if this type are executed first.
+- `kubemarine.core.patch.RegularPatch`. This accesses and makes some operations on the cluster.
+  These patches should not upgrade software, and should not affect the upgrade procedure.
+  Patches if this type are executed last.
 
 Also see the inline pydoc in [`kubemarine.core.patch`](/kubemarine/core/patch.py).
 
 In addition, each patch has one field and two methods to implement:
-* **identifier** is a unique name of a patch that is used to recognize it and call if needed.
-* **description** is a method that returns text description of a patch. This method is used in the `migrate_kubemarine --describe <patch identifier>` operation.
-* **action** is a method that returns special implementation of the [`kubemarine.core.action.Action`](/kubemarine/core/action.py) class that contains the main code of a patch.
+
+- **identifier** is a unique name of a patch that is used to recognize it and call if needed.
+- **description** is a method that returns text description of a patch. This method is used in the `migrate_kubemarine --describe <patch identifier>` operation.
+- **action** is a method that returns special implementation of the [`kubemarine.core.action.Action`](/kubemarine/core/action.py) class that contains the main code of a patch.
 
 To enable a patch, you should add it to [`kubemarine.patches.__init__`](/kubemarine/patches/__init__.py#L26).
 Patches that have the same type are executed in the order that is declared there.
@@ -46,12 +48,14 @@ For more information, refer to the [design document](/documentation/design/1-upg
 ## Examples
 
 All historical patches can be viewed using the command:
+
 ```shell
 git log --oneline -- kubemarine/patches | grep -v "Delete all patches after release"
 ```
 
 Below are the actual templates for `InventoryOnlyPatch` and `RegularPatch` patches.
 Also see the inline comments.
+
 <details>
   <summary>Inventory only patch</summary>
 
@@ -88,11 +92,11 @@ class TheAction(Action):
 class MyPatch(InventoryOnlyPatch):
     def __init__(self) -> None:
         super().__init__("<patch_id>")
-    
+
     @property
     def action(self) -> Action:
         return TheAction()
-    
+
     @property
     def description(self) -> str:
         return dedent(
@@ -103,6 +107,7 @@ class MyPatch(InventoryOnlyPatch):
             """.rstrip()
         )
 ```
+
 </details>
 
 <details>
@@ -148,6 +153,7 @@ class MyPatch(RegularPatch):
             """.rstrip()
         )
 ```
+
 </details>
 
 As you can see, the main code is located in custom implementation of `Action.run()`.
@@ -217,7 +223,7 @@ class TheAction(Action):
     def __init__(self) -> None:
         # note `recreate_inventory=True`
         super().__init__("Ensure backward compatibility", recreate_inventory=True)
-    
+
     def run(self, res: DynamicResources) -> None:
         res.inventory()['property_that_sets_previous_default_behaviour'] = True
 ```
