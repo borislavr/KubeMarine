@@ -3,11 +3,11 @@
   "type": "object",
   "description": "Wait until the necessary Kubernetes resources are ready",
   "properties": {
-    "daemonsets": {"$ref": "#/definitions/GenericResource"},
-    "replicasets": {"$ref": "#/definitions/GenericResource"},
-    "statefulsets": {"$ref": "#/definitions/GenericResource"},
-    "deployments": {"$ref": "#/definitions/GenericResource"},
-    "pods": {"$ref": "#/definitions/Pods"}
+    "daemonsets": { "$ref": "#/definitions/GenericResource" },
+    "replicasets": { "$ref": "#/definitions/GenericResource" },
+    "statefulsets": { "$ref": "#/definitions/GenericResource" },
+    "deployments": { "$ref": "#/definitions/GenericResource" },
+    "pods": { "$ref": "#/definitions/Pods" }
   },
   "minProperties": 1,
   "additionalProperties": false,
@@ -15,18 +15,18 @@
     "GenericResource": {
       "description": "Type of Kubernetes resources. Can be either a list of names or a dictionary with the extra parameters.",
       "oneOf": [
-        {"$ref": "#/definitions/ResourcesList"},
+        { "$ref": "#/definitions/ResourcesList" },
         {
           "type": "object",
-          "allOf": [{"$ref": "#/definitions/CommonResourceProperties"}],
+          "allOf": [{ "$ref": "#/definitions/CommonResourceProperties" }],
           "properties": {
-            "list": {"$ref": "#/definitions/ResourcesList"}
+            "list": { "$ref": "#/definitions/ResourcesList" }
           },
           "required": ["list"],
           "propertyNames": {
             "anyOf": [
-              {"$ref": "#/definitions/CommonResourcePropertyNames"},
-              {"enum": ["list"]}
+              { "$ref": "#/definitions/CommonResourcePropertyNames" },
+              { "enum": ["list"] }
             ]
           }
         }
@@ -37,7 +37,7 @@
       "description": "List of resource names, or list of dictionaries with the extra parameters",
       "items": {
         "oneOf": [
-          {"type": "string"},
+          { "type": "string" },
           {
             "type": "object",
             "properties": {
@@ -57,12 +57,12 @@
     "Pods": {
       "description": "Type of Kubernetes resources. Can be either a list of names or a dictionary with the extra parameters.",
       "oneOf": [
-        {"$ref": "#/definitions/PodsList"},
+        { "$ref": "#/definitions/PodsList" },
         {
           "type": "object",
-          "allOf": [{"$ref": "#/definitions/CommonResourceProperties"}],
+          "allOf": [{ "$ref": "#/definitions/CommonResourceProperties" }],
           "properties": {
-            "list": {"$ref": "#/definitions/PodsList"},
+            "list": { "$ref": "#/definitions/PodsList" },
             "namespace": {
               "type": "string"
             }
@@ -70,8 +70,8 @@
           "required": ["list"],
           "propertyNames": {
             "anyOf": [
-              {"$ref": "#/definitions/CommonResourcePropertyNames"},
-              {"enum": ["list", "namespace"]}
+              { "$ref": "#/definitions/CommonResourcePropertyNames" },
+              { "enum": ["list", "namespace"] }
             ]
           }
         }

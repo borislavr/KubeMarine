@@ -63,8 +63,8 @@
   "definitions": {
     "ListOrEverything": {
       "oneOf": [
-        {"type": "string", "enum": ["all"], "default": "all"},
-        {"$ref": "definitions/common/utils.json#/definitions/SetOfStrings"}
+        { "type": "string", "enum": ["all"], "default": "all" },
+        { "$ref": "definitions/common/utils.json#/definitions/SetOfStrings" }
       ]
     }
   }

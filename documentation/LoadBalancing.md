@@ -1,4 +1,4 @@
-The following functions are installed in this section.  
+The following functions are installed in this section.
 
 **Table of Content**
 
@@ -30,17 +30,17 @@ For more information about Nginx Ingress Controller default certificate, visit [
 
 This approach has the following limitations:
 
-* Adding a new hostname might require to re-issue the certificate, if the new hostname does not match any previous wildcard SANs.
-* Connections from the Nginx Ingress Controller to applications are through HTTP; thus, without an encryption.
-* L7 load balancing options can be customized through "ingress" resources only.
+- Adding a new hostname might require to re-issue the certificate, if the new hostname does not match any previous wildcard SANs.
+- Connections from the Nginx Ingress Controller to applications are through HTTP; thus, without an encryption.
+- L7 load balancing options can be customized through "ingress" resources only.
 
 ### How to Install
 
 To enable TLS termination on Nginx Ingress Controller using the default certificate, it is required to customize the "nginx" plugin with a custom default certificate.
 This can be done during:
 
-* Installation; for details, refer to [nginx plugin installation](/documentation/Installation.md#nginx-ingress-controller).
-* On an already installed Nginx Ingress Controller, using the `certs_renew` maintenance procedure. For details, refer to [certificate renew maintenance procedure](/documentation/Maintenance.md#configuring-certificate-renew-procedure-for-nginx-ingress-controller).
+- Installation; for details, refer to [nginx plugin installation](/documentation/Installation.md#nginx-ingress-controller).
+- On an already installed Nginx Ingress Controller, using the `certs_renew` maintenance procedure. For details, refer to [certificate renew maintenance procedure](/documentation/Maintenance.md#configuring-certificate-renew-procedure-for-nginx-ingress-controller).
 
 **Important**: The default certificate should be issued to wildcard hostnames, so that it can be used for all ingresses.
 
@@ -57,20 +57,20 @@ For load balancer nodes' hardware requirements, refer to [Minimal Hardware Requi
 You can also use your own TCP load balancer instead of kubemarine-provided HAProxy.
 In this case, your custom TCP load balancer should meet the following requirements:
 
-* The load balancer should be fully configured and working before running the cluster installation using kubemarine.
-* The load balancer's internal and external VRRP IP addresses should be specified in `cluster.yaml`. For more information, refer to the [`control_plain` Installation Section](/documentation/Installation.md#control_plain).
-* The load balancer should be an L4 pass-through TCP load balancer, without TLS termination.
-* The load balancer should be Highly Available.
-* The load balancer should have HTTPS (port 443) and Kubernetes API (port 6443) frontends.
-* The HTTPS frontend should point to backend port 443 of worker nodes where Nginx Ingress Controller is installed.
-* The Kubernetes API frontend should point to backend port 6443 of all control-plane nodes.
-* The load balancer backend configuration should be updated accordingly when new nodes are added or removed from a cluster.
+- The load balancer should be fully configured and working before running the cluster installation using kubemarine.
+- The load balancer's internal and external VRRP IP addresses should be specified in `cluster.yaml`. For more information, refer to the [`control_plain` Installation Section](/documentation/Installation.md#control_plain).
+- The load balancer should be an L4 pass-through TCP load balancer, without TLS termination.
+- The load balancer should be Highly Available.
+- The load balancer should have HTTPS (port 443) and Kubernetes API (port 6443) frontends.
+- The HTTPS frontend should point to backend port 443 of worker nodes where Nginx Ingress Controller is installed.
+- The Kubernetes API frontend should point to backend port 6443 of all control-plane nodes.
+- The load balancer backend configuration should be updated accordingly when new nodes are added or removed from a cluster.
 
 ## Advanced Load Balancing techniques
 
 ### Allow and Deny Lists
 
-Sometimes, it may be required to allow or deny only specific requests based on some criteria. 
+Sometimes, it may be required to allow or deny only specific requests based on some criteria.
 The possible criteria depends on the type of the load balancer (TCP or HTTP).
 
 #### Allow and Deny Lists on TCP Load Balancer
@@ -124,16 +124,17 @@ In this example, the `whitelist.myservicea.foo.org` hostname is available only f
 
 ### Preserving Original HTTP Headers
 
-The TCP load balancer does not modify the HTTP response/request headers. 
-The Nginx Ingress Controller also does not modify **custom** HTTP headers. 
+The TCP load balancer does not modify the HTTP response/request headers.
+The Nginx Ingress Controller also does not modify **custom** HTTP headers.
 However, the Nginx Ingress Controller may modify some well-known headers as described below:
-1. Nginx Ingress Controller always drops some response headers, 
-particularly, `Date`, `Server`, `X-Pad`, and `X-Accel-...`. For more information, see [http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_hide_header](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_hide_header).
+
+1. Nginx Ingress Controller always drops some response headers,
+   particularly, `Date`, `Server`, `X-Pad`, and `X-Accel-...`. For more information, see [http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_hide_header](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_hide_header).
 2. Nginx Ingress Controller by default sets its own values for `X-Forwarded-*` headers.
-If you have to preserve original values for these headers, refer to the `use-forwarded-header` config map option at [https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#use-forwarded-headers](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#use-forwarded-headers).
-This is only required if you have another HTTP LB in front of the Nginx Ingress Controller, which sets these headers.
-3. Nginx Ingress Controller does not forward the `Expect` header. 
-This issue can be solved by adding the "proxy_set_header" field in the NGINX configuration with value, "Expect $http_expect". An example of `cluster.yaml` configuration is as follows:
+   If you have to preserve original values for these headers, refer to the `use-forwarded-header` config map option at [https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#use-forwarded-headers](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#use-forwarded-headers).
+   This is only required if you have another HTTP LB in front of the Nginx Ingress Controller, which sets these headers.
+3. Nginx Ingress Controller does not forward the `Expect` header.
+   This issue can be solved by adding the "proxy_set_header" field in the NGINX configuration with value, "Expect $http_expect". An example of `cluster.yaml` configuration is as follows:
 
 ```
 plugins:
@@ -177,23 +178,23 @@ To actually move HAProxy to maintenance mode, it is required to change HAProxy c
 To do this without conflicting with Kubemarine, use the following steps:
 
 1. Create HAProxy systemd drop-in directory, if not created already. For example, if the HAProxy service is named `haproxy.service`,
-you need to create the `/etc/systemd/system/haproxy.service.d` directory.
+   you need to create the `/etc/systemd/system/haproxy.service.d` directory.
 1. In this directory, create a file named `EnvFile` with the following content:
 
-      ```csv
-      CONFIG=/etc/haproxy/haproxy-mntc.cfg
-      ```
+   ```csv
+   CONFIG=/etc/haproxy/haproxy-mntc.cfg
+   ```
 
 1. In the same directory, create a file named `select.conf` with the path to `EnvFile` created above:
 
-      ```csv
-      [Service]
-      EnvironmentFile=/etc/systemd/system/haproxy.service.d/EnvFile
-      ```
+   ```csv
+   [Service]
+   EnvironmentFile=/etc/systemd/system/haproxy.service.d/EnvFile
+   ```
 
 1. Restart the HAProxy service using the command `sudo systemctl daemon-reload; sudo systemctl restart haproxy`
 1. To disable maintenance mode, change `EnvFile` content to use the default configuration and restart HAProxy again:
 
-      ```csv
-      CONFIG=/etc/haproxy/haproxy.cfg
-      ```
+   ```csv
+   CONFIG=/etc/haproxy/haproxy.cfg
+   ```

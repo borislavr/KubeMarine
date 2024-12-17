@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema",
   "type": "object",
   "description": "Describe parameters that needs to be applied by default to each record in the rbac.accounts section",
-  "allOf": [{"$ref": "#/definitions/CommonAccountProperties"}],
+  "allOf": [{ "$ref": "#/definitions/CommonAccountProperties" }],
   "propertyNames": {
     "$ref": "#/definitions/CommonAccountPropertyNames"
   },
@@ -18,9 +18,9 @@
           "type": "array",
           "description": "YAML settings for ServiceAccount, ClusterRoleBinding and Secret",
           "items": [
-            {"$ref": "#/definitions/ServiceAccount"},
-            {"$ref": "#/definitions/ClusterRoleBinding"},
-            {"$ref": "#/definitions/Secret"}
+            { "$ref": "#/definitions/ServiceAccount" },
+            { "$ref": "#/definitions/ClusterRoleBinding" },
+            { "$ref": "#/definitions/Secret" }
           ],
           "minItems": 3,
           "maxItems": 3
@@ -33,13 +33,13 @@
     "ServiceAccount": {
       "type": "object",
       "properties": {
-        "apiVersion": {"type": "string", "default": "v1"},
-        "kind": {"enum": ["ServiceAccount"], "default": "ServiceAccount"},
+        "apiVersion": { "type": "string", "default": "v1" },
+        "kind": { "enum": ["ServiceAccount"], "default": "ServiceAccount" },
         "metadata": {
           "type": "object",
           "properties": {
-            "name": {"type": "string"},
-            "namespace": {"type": "string", "default": "kube-system"}
+            "name": { "type": "string" },
+            "namespace": { "type": "string", "default": "kube-system" }
           }
         },
         "secrets": {
@@ -47,7 +47,7 @@
           "items": {
             "type": "object",
             "properties": {
-              "name": {"type": "string"}
+              "name": { "type": "string" }
             }
           }
         }
@@ -57,18 +57,24 @@
     "ClusterRoleBinding": {
       "type": "object",
       "properties": {
-        "apiVersion": {"type": "string", "default": "rbac.authorization.k8s.io/v1"},
-        "kind": {"enum": ["ClusterRoleBinding"], "default": "ClusterRoleBinding"},
+        "apiVersion": {
+          "type": "string",
+          "default": "rbac.authorization.k8s.io/v1"
+        },
+        "kind": {
+          "enum": ["ClusterRoleBinding"],
+          "default": "ClusterRoleBinding"
+        },
         "metadata": {
           "type": "object",
           "properties": {
-            "name": {"type": "string"}
+            "name": { "type": "string" }
           }
         },
         "roleRef": {
           "type": "object",
           "properties": {
-            "name": {"type": "string"}
+            "name": { "type": "string" }
           }
         },
         "subjects": {
@@ -76,8 +82,8 @@
           "items": {
             "type": "object",
             "properties": {
-              "name": {"type": "string"},
-              "namespace": {"type": "string", "default": "kube-system"}
+              "name": { "type": "string" },
+              "namespace": { "type": "string", "default": "kube-system" }
             }
           }
         }
@@ -87,19 +93,22 @@
     "Secret": {
       "type": "object",
       "properties": {
-        "apiVersion": {"type": "string", "default": "v1"},
-        "kind": {"enum": ["Secret"], "default": "Secret"},
+        "apiVersion": { "type": "string", "default": "v1" },
+        "kind": { "enum": ["Secret"], "default": "Secret" },
         "metadata": {
           "type": "object",
           "properties": {
-            "name": {"type": "string"},
-            "namespace": {"type": "string", "default": "kube-system"},
+            "name": { "type": "string" },
+            "namespace": { "type": "string", "default": "kube-system" },
             "annotations": {
               "type": "object"
             }
           }
         },
-        "type": {"type": "string", "default": "kubernetes.io/service-account-token"}
+        "type": {
+          "type": "string",
+          "default": "kubernetes.io/service-account-token"
+        }
       },
       "required": ["apiVersion", "kind"]
     }
