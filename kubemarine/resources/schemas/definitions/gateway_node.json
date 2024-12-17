@@ -2,8 +2,8 @@
   "$schema": "http://json-schema.org/draft-07/schema",
   "type": "object",
   "allOf": [
-    {"$ref": "node_defaults.json#/definitions/SSHAccessCommonProperties"},
-    {"$ref": "node_defaults.json#/definitions/OneOfKeyfilePasswordSpec"}
+    { "$ref": "node_defaults.json#/definitions/SSHAccessCommonProperties" },
+    { "$ref": "node_defaults.json#/definitions/OneOfKeyfilePasswordSpec" }
   ],
   "properties": {
     "name": {
@@ -18,8 +18,10 @@
   "required": ["name", "address", "username"],
   "propertyNames": {
     "anyOf": [
-      {"$ref": "node_defaults.json#/definitions/SSHAccessCommonPropertyNames"},
-      {"enum": ["name", "address"]}
+      {
+        "$ref": "node_defaults.json#/definitions/SSHAccessCommonPropertyNames"
+      },
+      { "enum": ["name", "address"] }
     ]
   }
 }

@@ -3,8 +3,8 @@
   "type": "object",
   "description": "Defines addresses of remote resources to use in private environments without access to internet",
   "oneOf": [
-    {"$ref": "#/definitions/NewEndpointsFormat"},
-    {"$ref": "#/definitions/OldAddressPortFormat"}
+    { "$ref": "#/definitions/NewEndpointsFormat" },
+    { "$ref": "#/definitions/OldAddressPortFormat" }
   ],
   "definitions": {
     "NewEndpointsFormat": {

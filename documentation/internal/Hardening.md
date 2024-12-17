@@ -1,4 +1,5 @@
 # Security Hardening Guide
+
 <!-- TOC -->
 
 - [Overview](#overview)
@@ -59,8 +60,8 @@ kind: ClusterRole
 metadata:
   name: healthz
 rules:
-- nonResourceURLs: ["/readyz", "/livez"]
-  verbs: ["get"]
+  - nonResourceURLs: ["/readyz", "/livez"]
+    verbs: ["get"]
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -86,9 +87,9 @@ roleRef:
   kind: ClusterRole
   name: healthz
 subjects:
-- kind: ServiceAccount
-  name: healthz
-  namespace: kube-system
+  - kind: ServiceAccount
+    name: healthz
+    namespace: kube-system
 ```
 
 **Note:** ClusterRole and ClusterRoleBinding are not required
@@ -99,68 +100,67 @@ Though, such role bindings provide wider permissions than those that are necessa
 
 1. Add `anonymous-auth: "false"` into the `kubeadm-config` configmap. For example:
 
-    ```yaml
-    apiVersion: v1
-    data:
-      ClusterConfiguration: |
-        apiServer:
-          certSANs:
-          - 192.168.56.106
-          - ubuntu
-          extraArgs:
-            anonymous-auth: "false"
-    ...
-    ```
+   ```yaml
+   apiVersion: v1
+   data:
+     ClusterConfiguration: |
+       apiServer:
+         certSANs:
+         - 192.168.56.106
+         - ubuntu
+         extraArgs:
+           anonymous-auth: "false"
+   ```
 
 2. Change the `kube-apiserver` manifest on each control plane nodes one by one according to the following example:
 
-    ```yaml
-    apiVersion: v1
-    kind: Pod
-    metadata:
-    ...
-      name: kube-apiserver
-      namespace: kube-system
-    spec:
-      containers:
-      - command:
-        - kube-apiserver
-        - --anonymous-auth=false
-    ...
-        livenessProbe:
-          failureThreshold: 8
-          httpGet:
-            host: 192.168.56.106
-            path: /livez
-            port: 6443
-            scheme: HTTPS
-            httpHeaders:
-              - name: Authorization
-                value: Bearer <TOKEN>
-    ...
-        readinessProbe:
-          failureThreshold: 3
-          httpGet:
-            host: 192.168.56.106
-            path: /readyz
-            port: 6443
-            scheme: HTTPS
-            httpHeaders:
-              - name: Authorization
-                value: Bearer <TOKEN>
-    ...
-        startupProbe:
-          failureThreshold: 24
-          httpGet:
-            host: 192.168.56.106
-            path: /livez
-            port: 6443
-            scheme: HTTPS
-            httpHeaders:
-              - name: Authorization
-                value: Bearer <TOKEN>
-    ...
-    ```
+   ```yaml
+   apiVersion: v1
+   kind: Pod
+   metadata:
+   ...
+     name: kube-apiserver
+     namespace: kube-system
+   spec:
+     containers:
+     - command:
+       - kube-apiserver
+       - --anonymous-auth=false
+   ...
+       livenessProbe:
+         failureThreshold: 8
+         httpGet:
+           host: 192.168.56.106
+           path: /livez
+           port: 6443
+           scheme: HTTPS
+           httpHeaders:
+             - name: Authorization
+               value: Bearer <TOKEN>
+   ...
+       readinessProbe:
+         failureThreshold: 3
+         httpGet:
+           host: 192.168.56.106
+           path: /readyz
+           port: 6443
+           scheme: HTTPS
+           httpHeaders:
+             - name: Authorization
+               value: Bearer <TOKEN>
+   ...
+       startupProbe:
+         failureThreshold: 24
+         httpGet:
+           host: 192.168.56.106
+           path: /livez
+           port: 6443
+           scheme: HTTPS
+           httpHeaders:
+             - name: Authorization
+               value: Bearer <TOKEN>
+   ...
+   ```
 
 Where, TOKEN is the result of the following command:
 
@@ -242,24 +242,25 @@ data:
 There is an `--encryption-provider-config` option that points to the `EncryptionConfiguration` file location. The `kube-apiserver` should have the following parts in the manifest yaml:
 
 ```yaml
-...
+
+---
 spec:
   containers:
-  - command:
-    - kube-apiserver
-     ...
-    - --encryption-provider-config=/etc/kubernetes/enc/enc.yaml
-      ...
-    volumeMounts:
-    - name: enc
-      mountPath: /etc/kubernetes/enc
-      readonly: true
-       ...
+    - command:
+        - kube-apiserver
+          ...
+        - --encryption-provider-config=/etc/kubernetes/enc/enc.yaml
+          ...
+      volumeMounts:
+        - name: enc
+          mountPath: /etc/kubernetes/enc
+          readonly: true
+            ...
   volumes:
-  - name: enc
-    hostPath:
-      path: /etc/kubernetes/enc
-      type: DirectoryOrCreate
+    - name: enc
+      hostPath:
+        path: /etc/kubernetes/enc
+        type: DirectoryOrCreate
 ```
 
 In the above case, `secrets` and `configmaps` are encrypted on the first key of the `aesgcm` provider, but the previously encrypted `secrets` and `configmaps` are decrypted on any keys of any providers that are matched. This approach allows to change both encryption providers and keys during the operation. The keys should be random strings in base64 encoding. `identity` is the default provider that does not provide any encryption at all.
@@ -298,16 +299,16 @@ metadata:
   namespace: kube-system
 spec:
   containers:
-  - command:
-    volumeMounts:
-    - mountPath: /opt/vault-kms/vaultkms.socket
-      name: vault-kms
-       ...
+    - command:
+      volumeMounts:
+        - mountPath: /opt/vault-kms/vaultkms.socket
+          name: vault-kms
+            ...
   volumes:
-  - hostPath:
-      path: /opt/vault-kms/vaultkms.socket
-      type: Socket
-    name: vault-kms
+    - hostPath:
+        path: /opt/vault-kms/vaultkms.socket
+        type: Socket
+      name: vault-kms
 ```
 
 The environment variable `VAULT_ADDR` matches the address of the `Vault` service and `--listen-addr` argument points to the KMS plugin unix socket in the following example:
@@ -334,7 +335,7 @@ spec:
           env:
             - name: VAULT_ADDR
               value: http://vault-adress:8200
-               ...
+                ...
       containers:
         - name: vault-kms-provider
           image: ghcr.io/ondat/trousseau:v1.1.3
@@ -394,7 +395,7 @@ It is then possible to remove the encryption settings from the `kubeadm-config` 
 ### Maintenance and Operation Features
 
 - Since the `/etc/kubernetes/enc/enc.yaml` file has keys, access to the file must be restricted. For instance:
-  
+
 ```console
 # chmod 0700 /etc/kubernetes/enc/
 ```
@@ -413,7 +414,8 @@ It is then possible to remove the encryption settings from the `kubeadm-config` 
 The `kubelet` server certificate is self-signed by default, and is usually stored in the `/var/lib/kubelet/pki/kubelet.crt` file. To avoid using the self-signed `kubelet` server certificate, alter the `cluster.yaml` file in the following way:
 
 ```yaml
-...
+
+---
 services:
   kubeadm_kubelet:
     serverTLSBootstrap: true
@@ -422,7 +424,6 @@ services:
     apiServer:
       extraArgs:
         kubelet-certificate-authority: /etc/kubernetes/pki/ca.crt
-...
 ```
 
 These settings enforce `kubelet` on each node of the cluster to request certificate approval (for `kubelet` server part) from the default Kubernetes CA and rotate certificate in the future. The `kube-apiserver` machinery does not approve certificate requests for `kubelet` automatically. They can be approved manually by the following commands. Use the following command to get the list of certificate requests:
@@ -474,7 +475,6 @@ metadata:
   name: ingress-nginx
   namespace: ingress-nginx
 automountServiceAccountToken: false
-...
 ```
 
 ### Create Secret
@@ -497,18 +497,16 @@ type: kubernetes.io/service-account-token
 Edit the POD specification and mount the secret as a volume to the pod as follows.
 
 ```yaml
-...
+
+---
 volumeMounts:
   - name: ingress-nginx-token
     mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-
-...
-
+---
 volumes:
   - name: ingress-nginx-token
     secret:
       secretName: ingress-nginx-token
-...
 ```
 
 After this, restart the pod to reflect the changes and verify that the secret is mounted to the pod at the specified mount point.
@@ -582,6 +580,6 @@ Alternative mechanisms provided by Kubernetes such as the use of OIDC should be 
 Here is a list of available tools that can be used for Identity and Access Management in Kubernetes cluster.
 
 1. **Dex** - A lightweight OIDC provider server that can be configured to work with various identity providers. More information about this tool can be found on https://github.com/dexidp/dex. The documentation for configuring Dex with your k8s cluster can be found at https://dexidp.io/docs/kubernetes/.
-2. **OpenUnison** - An open-source OIDC provider, focusing on security and ease of use. More information about this tool can be found at https://github.com/OpenUnison/openunison-k8s-idm-oidc. The documentation for configuring OpenUnison with your k8s cluster can be found at https://openunison.github.io/. 
-3. **Keycloak** - An open source identity and access management solution. More information about this tool can be found at https://www.keycloak.org. The documentation for configuring Keycloak with your k8s cluster can be found at https://medium.com/elmo-software/kubernetes-authenticating-to-your-cluster-using-keycloak-eba81710f49b. 
-4. **JWT Authenticator** - Kubernetes itself offers a built-in "JWT Authenticator". This authenticator validates tokens issued by an OIDC provider based on the configured issuer and retrieves the public key for verification through OIDC discovery. More information about this tool can be found at https://kubernetes.io/docs/reference/access-authn-authz/authentication/. 
+2. **OpenUnison** - An open-source OIDC provider, focusing on security and ease of use. More information about this tool can be found at https://github.com/OpenUnison/openunison-k8s-idm-oidc. The documentation for configuring OpenUnison with your k8s cluster can be found at https://openunison.github.io/.
+3. **Keycloak** - An open source identity and access management solution. More information about this tool can be found at https://www.keycloak.org. The documentation for configuring Keycloak with your k8s cluster can be found at https://medium.com/elmo-software/kubernetes-authenticating-to-your-cluster-using-keycloak-eba81710f49b.
+4. **JWT Authenticator** - Kubernetes itself offers a built-in "JWT Authenticator". This authenticator validates tokens issued by an OIDC provider based on the configured issuer and retrieves the public key for verification through OIDC discovery. More information about this tool can be found at https://kubernetes.io/docs/reference/access-authn-authz/authentication/.

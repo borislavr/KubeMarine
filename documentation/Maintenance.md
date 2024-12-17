@@ -3,30 +3,30 @@ This section describes the features and steps for performing maintenance procedu
 - [Prerequisites](#prerequisites)
 - [Basics](#basics)
 - [Provided Procedures](#provided-procedures)
-    - [Kubemarine Migration Procedure](#kubemarine-migration-procedure)
-      - [Software Upgrade Patches](#software-upgrade-patches)
-    - [Upgrade Procedure](#upgrade-procedure)
-    - [Backup Procedure](#backup-procedure)
-    - [Restore Procedure](#restore-procedure)
-    - [Add Node Procedure](#add-node-procedure)
-      - [Operating System Migration](#operating-system-migration)
-    - [Remove Node Procedure](#remove-node-procedure)
-    - [Reconfigure Procedure](#reconfigure-procedure)
-    - [Manage PSS Procedure](#manage-pss-procedure)
-    - [Reboot Procedure](#reboot-procedure)
-    - [Certificate Renew Procedure](#certificate-renew-procedure)
+  - [Kubemarine Migration Procedure](#kubemarine-migration-procedure)
+    - [Software Upgrade Patches](#software-upgrade-patches)
+  - [Upgrade Procedure](#upgrade-procedure)
+  - [Backup Procedure](#backup-procedure)
+  - [Restore Procedure](#restore-procedure)
+  - [Add Node Procedure](#add-node-procedure)
+    - [Operating System Migration](#operating-system-migration)
+  - [Remove Node Procedure](#remove-node-procedure)
+  - [Reconfigure Procedure](#reconfigure-procedure)
+  - [Manage PSS Procedure](#manage-pss-procedure)
+  - [Reboot Procedure](#reboot-procedure)
+  - [Certificate Renew Procedure](#certificate-renew-procedure)
 - [Procedure Execution](#procedure-execution)
-    - [Procedure Execution From CLI](#procedure-execution-from-cli)
-    - [Logging](#logging)
-    - [Inventory Preservation](#inventory-preservation)
-    - [Additional Parameters](#additional-parameters)
-      - [Grace Period and Drain Timeout](#grace-period-and-drain-timeout)
-      - [Images Prepull](#images-prepull)
+  - [Procedure Execution From CLI](#procedure-execution-from-cli)
+  - [Logging](#logging)
+  - [Inventory Preservation](#inventory-preservation)
+  - [Additional Parameters](#additional-parameters)
+    - [Grace Period and Drain Timeout](#grace-period-and-drain-timeout)
+    - [Images Prepull](#images-prepull)
 - [Additional Procedures](#additional-procedures)
-    - [Changing Calico Settings](#changing-calico-settings)
-    - [Data Encryption in Kubernetes](internal/Hardening.md#data-encryption-in-kubernetes)
-    - [Changing Cluster CIDR](#changing-cluster-cidr)
-    - [Kubelet Server Certificate Approval](#kubelet-server-certificate-approval)
+  - [Changing Calico Settings](#changing-calico-settings)
+  - [Data Encryption in Kubernetes](internal/Hardening.md#data-encryption-in-kubernetes)
+  - [Changing Cluster CIDR](#changing-cluster-cidr)
+  - [Kubelet Server Certificate Approval](#kubelet-server-certificate-approval)
 - [Common Practice](#common-practice)
   - [Security Hardening Guide](#security-hardening-guide)
   - [Worker Nodes Should be Managed by Kubelet](#worker-nodes-should-be-managed-by-kubelet)
@@ -41,7 +41,7 @@ Before you start any maintenance procedure, you must complete the following mand
 1. If using custom RPM repositories, make sure they are online, accessible from nodes, and you are able to perform repository updates.
 1. Prepare the latest actual **cluster.yaml** that should contain information about the current cluster state. For more information, refer to the [Kubemarine Inventory Preparation](Installation.md#inventory-preparation) section in _Kubemarine Installation Procedure_.
 
-   **Note**: If you provide an incorrect config file, it can cause unknown consequences. For more information, refer to [Basics](#basics). 
+   **Note**: If you provide an incorrect config file, it can cause unknown consequences. For more information, refer to [Basics](#basics).
 
 1. Prepare **procedure.yaml** file containing the configuration for the procedure that you are about to perform. Each procedure has its own configuration format. Read documentation below to fill procedure inventory data.
 
@@ -67,10 +67,11 @@ The Kubemarine migration procedure allows you to automatically adopt your curren
 This procedure should always be considered when taking new versions of Kubemarine if it is going to be used on the existing clusters that are managed by the previous versions of Kubemarine.
 
 Remember the following when upgrading Kubemarine:
-* Inspect all Kubemarine intermediate tags if they require some additional steps for migration.
-* Decide whether these steps should be applied.
-* If the steps should be done manually, perform them.
-  If they can be automated, checkout the necessary Kubemarine tag and apply the necessary *patches*.
+
+- Inspect all Kubemarine intermediate tags if they require some additional steps for migration.
+- Decide whether these steps should be applied.
+- If the steps should be done manually, perform them.
+  If they can be automated, checkout the necessary Kubemarine tag and apply the necessary _patches_.
   For more information, refer to the [Patch Identifiers](#patch-identifiers) section.
 
 **Note**: As much as any other maintenance procedure, `migrate_kubemarine` can make the cluster temporarily unavailable.
@@ -80,7 +81,7 @@ Remember the following when upgrading Kubemarine:
 
 To know if the given Kubemarine tag provides any automatic patch, it is necessary to inspect its release notes.
 Alternatively, it is possible to checkout this tag and call `migrate_kubemarine --list`.
-The output contains zero or more *patch identifiers*, each listed on a new line.
+The output contains zero or more _patch identifiers_, each listed on a new line.
 
 To receive more information about the chosen patch, it is necessary to call `migrate_kubemarine --describe <patch identifier>`.
 
@@ -117,6 +118,7 @@ The container runtime is upgraded by the `upgrade_cri` patch.
 For more information, refer to [Packages Upgrade Patches](#packages-upgrade-patches).
 
 The upgrade is performed node-by-node. The process for each node is as follows:
+
 1. All the pods are drained from the node.
 2. Containerd is upgraded.
 3. All containers on the node are deleted.
@@ -138,12 +140,14 @@ However, your custom containers may be deleted, and you need to start them manua
 #### Thirdparties Upgrade Patches
 
 Patches that upgrade thirdparties have the following identifiers:
-* `upgrade_crictl` - It upgrades the `/usr/bin/crictl` third-party, if necessary.
-* `upgrade_calico` - It upgrades the `/usr/bin/calicoctl` third-party as part of the Calico plugin upgrade.
+
+- `upgrade_crictl` - It upgrades the `/usr/bin/crictl` third-party, if necessary.
+- `upgrade_calico` - It upgrades the `/usr/bin/calicoctl` third-party as part of the Calico plugin upgrade.
 
 If the cluster is located in an isolated environment,
 it is possible to specify the custom paths to new thirdparties with a similar syntax as in the `cluster.yaml`
 as shown in the following snippet:
+
 ```yaml
 upgrade:
   thirdparties:
@@ -164,10 +168,11 @@ It is because in this case, you take a full control over the thirdparties' versi
 #### Packages Upgrade Patches
 
 Patches that upgrade system packages have the following identifiers:
-* `upgrade_cri` - It upgrades packages participating in the container runtime.
-   For more information, refer to [Upgrade CRI Patch](#upgrade-cri-patch).
-* `upgrade_haproxy` - It upgrades the Haproxy service on all balancers.
-* `upgrade_keepalived` - It upgrades the Keepalived service on all balancers.
+
+- `upgrade_cri` - It upgrades packages participating in the container runtime.
+  For more information, refer to [Upgrade CRI Patch](#upgrade-cri-patch).
+- `upgrade_haproxy` - It upgrades the Haproxy service on all balancers.
+- `upgrade_keepalived` - It upgrades the Keepalived service on all balancers.
 
 System packages such as containerd, haproxy, and keepalived are upgraded automatically as required.
 You can influence the system packages' upgrade using the `packages` section as follows:
@@ -178,7 +183,7 @@ upgrade:
     associations:
       containerd:
         package_name:
-          - 'containerd.io-1.6*'
+          - "containerd.io-1.6*"
 ```
 
 The configuration from the procedure inventory is merged with the configuration in the `cluster.yaml`.
@@ -193,10 +198,11 @@ It is because in this case, you take full control over the system packages and t
 #### Plugins Upgrade Patches
 
 Patches that upgrade the OOB plugins have the following identifiers:
-* `upgrade_calico` - It upgrades the Calico plugin.
-* `upgrade_nginx_ingress_controller` - It upgrades the NGINX Ingress Controller plugin.
-* `upgrade_kubernetes_dashboard` - It upgrades the Kubernetes dashboard plugin.
-* `upgrade_local_path_provisioner` - It upgrades the Local Path Provisioner plugin.
+
+- `upgrade_calico` - It upgrades the Calico plugin.
+- `upgrade_nginx_ingress_controller` - It upgrades the NGINX Ingress Controller plugin.
+- `upgrade_kubernetes_dashboard` - It upgrades the Kubernetes dashboard plugin.
+- `upgrade_local_path_provisioner` - It upgrades the Local Path Provisioner plugin.
 
 The plugins are upgraded automatically,
 but you can influence their upgrade using the `plugins` section as follows:
@@ -206,7 +212,7 @@ upgrade:
   plugins:
     calico:
       node:
-        image: 'calico/node:v3.25.1'
+        image: "calico/node:v3.25.1"
 ```
 
 After applying, this configuration is merged with the plugins' configuration contained in the current **cluster.yaml**.
@@ -217,15 +223,16 @@ The configuration format for the plugins is the same.
 
 ## Upgrade Procedure
 
-**Warnings**: 
-* Follow Kubernetes upgrade best practises, like:
-  * Have a number of replicas configured for Application Microservices
-  * [Pod anti-affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity) rules should be configured to avoid placement of more than one pod replicas on the  same worker node
-  * [PodDisruptionBudget](https://kubernetes.io/docs/tasks/run-application/configure-pdb) is configured for desired Deployments
-  * https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy is configured to _AlwaysAllow_
-* API versions `extensions/v1beta1` and `networking.k8s.io/v1beta1` are not supported starting from Kubernetes 1.22 and higher. Need to update ingress to the new API `networking.k8s.io/v1`. More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#ingress-v122
-* Before starting the upgrade, make sure you make a backup. For more information, see the section [Backup Procedure](#backup-procedure).
-* The upgrade procedure only maintains upgrading from one `supported` version to the higher `supported` version.
+**Warnings**:
+
+- Follow Kubernetes upgrade best practises, like:
+  - Have a number of replicas configured for Application Microservices
+  - [Pod anti-affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity) rules should be configured to avoid placement of more than one pod replicas on the same worker node
+  - [PodDisruptionBudget](https://kubernetes.io/docs/tasks/run-application/configure-pdb) is configured for desired Deployments
+  - https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy is configured to _AlwaysAllow_
+- API versions `extensions/v1beta1` and `networking.k8s.io/v1beta1` are not supported starting from Kubernetes 1.22 and higher. Need to update ingress to the new API `networking.k8s.io/v1`. More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#ingress-v122
+- Before starting the upgrade, make sure you make a backup. For more information, see the section [Backup Procedure](#backup-procedure).
+- The upgrade procedure only maintains upgrading from one `supported` version to the higher `supported` version.
   The target version must also be the latest patch version supported by Kubemarine.
   For example, upgrade is allowed from v1.26.7 to v1.26.11, or from v1.26.7 to v1.27.8, or from v1.26.7 to v1.28.4 through v1.27.8,
   but not from v1.26.7 to v1.27.1 as v1.27.1 is not the latest supported patch version of Kubernetes v1.27.
@@ -269,16 +276,16 @@ The script upgrades Kubernetes versions one-by-one. After each upgrade, the **cl
 Additionally, Kubemarine cleans up the `/etc/kubernetes/tmp` directory before the upgrade, where kubeadm stores the [backup files](https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#recovering-from-a-failure-state)
 during the upgrade. For this reason, only the backups for the latest upgrade through Kubemarine are placed here after the upgrade procedure.
 
-**Note**: It is not recommended to use the backup files for rolling back after the upgrade because it can follow an inconsistent state 
+**Note**: It is not recommended to use the backup files for rolling back after the upgrade because it can follow an inconsistent state
 for `cluster.yaml`. Use the Kubemarine [backup](#backup-procedure) and [restore](#restore-procedure) procedures instead of manual restoration.
 
 #### Upgrading Specific Nodes
 
 **Note**: Kubemarine automatically determines already upgraded nodes and excludes them from the Kubernetes upgrade procedure. Use manual nodes specifying for updating in exceptional cases when the problem cannot be solved automatically. Also, if any of the nodes are not available, first remove the node from the cluster, instead of changing the list of nodes for the upgrade.
 
-**Warning**: By manually specifying the nodes for the upgrade, you completely take control of yourself and bear all the consequences of an unsuccessful upgrade. 
+**Warning**: By manually specifying the nodes for the upgrade, you completely take control of yourself and bear all the consequences of an unsuccessful upgrade.
 
-In special cases, a situation may arise when you need to manually specify certain nodes that need to be upgraded. For such situations, a parameter, `upgrade_nodes`, is available in the procedure configuration. Within this parameter, list all the nodes that you want to upgrade. Specify the nodes in the same format in which they are specified in your main `cluster.yaml` config. 
+In special cases, a situation may arise when you need to manually specify certain nodes that need to be upgraded. For such situations, a parameter, `upgrade_nodes`, is available in the procedure configuration. Within this parameter, list all the nodes that you want to upgrade. Specify the nodes in the same format in which they are specified in your main `cluster.yaml` config.
 
 For Example:
 
@@ -304,7 +311,7 @@ upgrade_nodes:
 
 Based on the example above, only the nodes `worker-10` and `worker-11` are updated, the rest are skipped.
 
-**Note**: The nodes are excluded only from the Kubernetes upgrade. All other upgrade tasks like thirdparties, coredns, and so on are performed for all the nodes as they are. 
+**Note**: The nodes are excluded only from the Kubernetes upgrade. All other upgrade tasks like thirdparties, coredns, and so on are performed for all the nodes as they are.
 
 #### Nodes Saved Versions Before Upgrade
 
@@ -319,25 +326,28 @@ At the same time, there may be situations when this file interferes with a norma
 If the system service (`etcd`, `kube-apiserver`,`kube-controller`, `kube-scheduler`) configuration changes during the operation process, the changes should be reflected in the `kubeadm-config` configmap. Following is an example for `etcd`. Pay attention to the fact that the manifest file and configmap structure are different.
 
 `/etc/kubernetes/manifests/etcd.yaml`:
+
 ```yaml
-...
+
+---
 spec:
   containers:
-  - command:
-    - etcd
-    - --heartbeat-interval=1000
-    - --election-timeout=10000
-...
+    - command:
+        - etcd
+        - --heartbeat-interval=1000
+        - --election-timeout=10000
 ```
+
 `kubeadm-config` configmap:
+
 ```yaml
-...
+
+---
 etcd:
   local:
     extraArgs:
       heartbeat-interval: "1000"
       election-timeout: "10000"
-...
 ```
 
 #### Thirdparties Upgrade Section and Task
@@ -347,14 +357,14 @@ If the cluster is located in an isolated environment, it is possible to specify 
 ```yaml
 v1.30.1:
   thirdparties:
-      /usr/bin/kubeadm:
-        source: https://example.com/thirdparty.files/kubernetes/kubeadm/v1.30.1/bin/linux/amd64/kubeadm
-      /usr/bin/kubelet:
-        source: https://example.com/thirdparty.files/kubernetes/kubelet/v1.30.1/bin/linux/amd64/kubelet
-      /usr/bin/kubectl:
-        source: https://example.com/thirdparty.files/kubernetes/kubectl/v1.30.1/bin/linux/amd64/kubectl
-      /usr/bin/calicoctl:
-        source: https://example.com/thirdparty.files/projectcalico/calico/v3.27.3/calicoctl-linux-amd64
+    /usr/bin/kubeadm:
+      source: https://example.com/thirdparty.files/kubernetes/kubeadm/v1.30.1/bin/linux/amd64/kubeadm
+    /usr/bin/kubelet:
+      source: https://example.com/thirdparty.files/kubernetes/kubelet/v1.30.1/bin/linux/amd64/kubelet
+    /usr/bin/kubectl:
+      source: https://example.com/thirdparty.files/kubernetes/kubectl/v1.30.1/bin/linux/amd64/kubectl
+    /usr/bin/calicoctl:
+      source: https://example.com/thirdparty.files/projectcalico/calico/v3.27.3/calicoctl-linux-amd64
 ```
 
 This configuration replaces the configuration contained in the current **cluster.yaml**.
@@ -366,7 +376,7 @@ The upgrade is performed node-by-node.
 On each node, containerd is upgraded, if required.
 After all the pods are drained from the node, the node is upgraded and finally returned to the cluster for scheduling.
 
-By default, node drain is performed using `disable-eviction=True` to ignore the PodDisruptionBudget (PDB) rules. If you want to enforce PDB rules during the upgrade, set `disable-eviction` to False. However, in this case, the upgrade may fail if you are unable to drain the node due of PDB rules. `disable-eviction` works only for upgrades on Kubernetes versions >= 1.18. 
+By default, node drain is performed using `disable-eviction=True` to ignore the PodDisruptionBudget (PDB) rules. If you want to enforce PDB rules during the upgrade, set `disable-eviction` to False. However, in this case, the upgrade may fail if you are unable to drain the node due of PDB rules. `disable-eviction` works only for upgrades on Kubernetes versions >= 1.18.
 An example configuration to enforce PDB rules is as follows:
 
 ```yaml
@@ -406,7 +416,7 @@ v1.30.1:
     associations:
       containerd:
         package_name:
-          - 'containerd.io-1.6*'
+          - "containerd.io-1.6*"
 ```
 
 The requested actions for custom packages are performed in the `packages` task. The configuration from the procedure inventory replaces the configuration specified in the `cluster.yaml`. If you do not want to lose the packages specified in the `cluster.yaml`, then it is necessary to copy them to the procedure inventory.
@@ -446,11 +456,11 @@ v1.30.1:
               destination: /etc/example/configuration.yaml
               apply_required: true
               sudo: true
-              destination_groups: ['control-plane']
-              destination_nodes: ['worker-1']
+              destination_groups: ["control-plane"]
+              destination_nodes: ["worker-1"]
               apply_groups: None
-              apply_nodes: ['control-plane-1', 'worker-1']
-              apply_command: 'testctl apply -f /etc/example/configuration.yaml'
+              apply_nodes: ["control-plane-1", "worker-1"]
+              apply_command: "testctl apply -f /etc/example/configuration.yaml"
 ```
 
 You can also re-install custom or OOB plugins even without changes in the inventory configuration.
@@ -472,23 +482,24 @@ After applying, this configuration is merged with the plugins' configuration con
 
 The `upgrade` procedure executes the following sequence of tasks:
 
-* verify_upgrade_versions
-* thirdparties
-* prepull_images
-* kubernetes
-* kubernetes_cleanup
-* packages
-* plugins
-* overview
+- verify_upgrade_versions
+- thirdparties
+- prepull_images
+- kubernetes
+- kubernetes_cleanup
+- packages
+- plugins
+- overview
 
 ## Backup Procedure
 
 **Note**: Before starting the backup, make sure all nodes are online and accessible.
 
 The backup procedure automatically saves the following entities:
-* ETCD snapshot
-* Files and configs from cluster nodes
-* Kubernetes resources (if it's configured in procedure.yaml)
+
+- ETCD snapshot
+- Files and configs from cluster nodes
+- Kubernetes resources (if it's configured in procedure.yaml)
 
 As a result of the procedure, you receive an archive with all the stored objects inside. The archive has approximately the following structure inside:
 
@@ -560,8 +571,9 @@ By default, no parameters are required. However, if necessary, you can specify c
 
 By default, the backup is placed into the workdirectory. However, if you want to specify a different location, you can specify it through `backup_location` parameter.
 You can specify two types of path in it:
-* The full path of the file, including the name. In this case, the file is saved to the specified path with the name you specified.
-* Full path to the directory, without file name. In this case, the file is saved to the directory you specified, with the default name that contains the timestamp of the backup. For example:
+
+- The full path of the file, including the name. In this case, the file is saved to the specified path with the name you specified.
+- Full path to the directory, without file name. In this case, the file is saved to the directory you specified, with the default name that contains the timestamp of the backup. For example:
 
 ```
   /home/centos/backup-{cluster_name}-20201214-162731.tar.gz
@@ -571,7 +583,7 @@ You can specify two types of path in it:
 
 You can specify custom parameters for ETCD snapshot creation task. The following options are available:
 
-* `source_node` - the name of the node to create snapshot from. The node must be a control-plane and have a ETCD data located on it.
+- `source_node` - the name of the node to create snapshot from. The node must be a control-plane and have a ETCD data located on it.
 
 Parameters example:
 
@@ -585,27 +597,27 @@ backup_plan:
 
 By default, the following files are backed up from all nodes in the cluster:
 
-* /etc/resolv.conf
-* /etc/hosts
-* /etc/chrony.conf
-* /etc/selinux/config
-* /etc/systemd/system/kubelet.service
-* /etc/containerd/config.toml
-* /etc/containerd/certs.d
-* /etc/crictl.yaml
-* /etc/ctr/kubemarine_ctr_flags.conf
-* /etc/haproxy/haproxy.cfg
-* /etc/systemd/system/{haproxy_service_name}.service.d/{haproxy_service_name}.conf
-* /etc/keepalived/keepalived.conf
-* /etc/systemd/system/{keepalived_service_name}.service.d/{keepalived_service_name}.conf
-* /usr/local/bin/check_haproxy.sh
-* /etc/yum.repos.d/
-* /etc/apt/sources.list.d/
-* /etc/modules-load.d/
-* /etc/audit/rules.d/
-* /etc/kubernetes/
-* /var/lib/kubelet/pki/
-* /root/.kube/config
+- /etc/resolv.conf
+- /etc/hosts
+- /etc/chrony.conf
+- /etc/selinux/config
+- /etc/systemd/system/kubelet.service
+- /etc/containerd/config.toml
+- /etc/containerd/certs.d
+- /etc/crictl.yaml
+- /etc/ctr/kubemarine_ctr_flags.conf
+- /etc/haproxy/haproxy.cfg
+- /etc/systemd/system/{haproxy_service_name}.service.d/{haproxy_service_name}.conf
+- /etc/keepalived/keepalived.conf
+- /etc/systemd/system/{keepalived_service_name}.service.d/{keepalived_service_name}.conf
+- /usr/local/bin/check_haproxy.sh
+- /etc/yum.repos.d/
+- /etc/apt/sources.list.d/
+- /etc/modules-load.d/
+- /etc/audit/rules.d/
+- /etc/kubernetes/
+- /var/lib/kubelet/pki/
+- /root/.kube/config
 
 **Note**: If the file does not exist on the node, it is skipped without error.
 
@@ -628,6 +640,7 @@ The procedure can export any available Kubernetes resources from the cluster to 
 **Note**: If the specified resource is missing, it is skipped without an error.
 
 For the namespaced resources, you can specify the namespaces from which to export, as well as the full names of the resources to be exported. For example:
+
 ```yaml
 backup_plan:
   kubernetes:
@@ -642,6 +655,7 @@ backup_plan:
 ```
 
 Moreover, if you need to export everything, you can specify the special word `all`, as is follows:
+
 ```yaml
 backup_plan:
   kubernetes:
@@ -662,6 +676,7 @@ backup_plan:
 ```
 
 Another example:
+
 ```yaml
 backup_plan:
   kubernetes:
@@ -669,6 +684,7 @@ backup_plan:
 ```
 
 If you do not specify `backup_plan.kubernetes`, the following configuration will be used:
+
 ```yaml
 backup_plan:
   kubernetes:
@@ -682,21 +698,20 @@ backup_plan:
 
 The `backup` procedure executes the following sequence of tasks:
 
-* verify_backup_location
-* export
-  * inventory
-    * cluster_yaml
-    * ansible_inventory
-  * lists
-    * rpms
-    * hostname
-  * nodes
-  * etcd
-  * cluster_version
-  * kubernetes
-* make_descriptor
-* pack
-
+- verify_backup_location
+- export
+  - inventory
+    - cluster_yaml
+    - ansible_inventory
+  - lists
+    - rpms
+    - hostname
+  - nodes
+  - etcd
+  - cluster_version
+  - kubernetes
+- make_descriptor
+- pack
 
 ## Restore Procedure
 
@@ -708,9 +723,9 @@ The `backup` procedure executes the following sequence of tasks:
 
 The restore procedure automatically restores the following parts of the cluster:
 
-* Thirdparties
-* Nodes files and configs
-* ETCD database
+- Thirdparties
+- Nodes files and configs
+- ETCD database
 
 After recovery, the procedure reboots all cluster nodes.
 
@@ -726,7 +741,6 @@ For more information, see [Validation by JSON Schemas](Installation.md#inventory
 
 To start the procedure, you must mandatory specify `backup_location` parameter. Other parameters are optional, if necessary, you can also specify them.
 
-
 #### backup_location Parameter
 
 You need to specify the required path to the file with the backup - the recovery is performed from it.
@@ -741,8 +755,8 @@ backup_location: /home/centos/backup-{cluster_name}-20201214-162731.tar.gz
 
 By default, ETCD restore does not require additional parameters, however, if required, the following are supported:
 
-* image - the full name of the ETCD image, including the registry address. On its basis, the restoration is performed.
-* certificates - ETCD certificates for `etcdctl` connection to ETCD API. You can specify some certificates, or specify them all. Certificates should be presented on all nodes.
+- image - the full name of the ETCD image, including the registry address. On its basis, the restoration is performed.
+- certificates - ETCD certificates for `etcdctl` connection to ETCD API. You can specify some certificates, or specify them all. Certificates should be presented on all nodes.
 
 #### thirdparties Parameter
 
@@ -763,22 +777,20 @@ restore_plan:
 
 **Note**: The version must match the version of Kubernetes indicated in the `cluster.yaml`.
 
-
 ### Restore Procedure Tasks Tree
 
 The `restore` procedure executes the following sequence of tasks:
 
-* prepare
-  * stop_cluster
-* restore
-  * dns
-    * resolv_conf
-  * thirdparties
-* import
-  * nodes
-  * etcd
-* reboot
-
+- prepare
+  - stop_cluster
+- restore
+  - dns
+    - resolv_conf
+  - thirdparties
+- import
+  - nodes
+  - etcd
+- reboot
 
 ## Add Node Procedure
 
@@ -787,23 +799,23 @@ Each node can have different combination of roles.
 
 The procedure works as shown in the following table:
 
-|Case|Expected Result|Important Note|
-|---|---|---|
-|Add load balancer|A new load balancer is configured. If `vrrp_ip` is present, then all the Keepalived nodes are reconfigured and restarted.|Kubernetes installation should not start. Keepalived installation should start only if `vrrp_ip` is present.|
-|Add load balancer + Keepalived|A new load balancer is configured. Keepalived is installed and configured on all the load balancers.|Kubernetes installation should not start.|
-|Add control-plane|Kubernetes is installed only on a new node. A new control-plane is added to the Kubernetes cluster, and all Haproxy nodes are reconfigured and restarted.|Haproxy and Keepalived installation should not start.|
-|Add worker|Kubernetes is installed only on a new node. A new worker is added to the Kubernetes cluster, and all Haproxy nodes are reconfigured and restarted.|Haproxy and Keepalived installation should not start.|
+| Case                           | Expected Result                                                                                                                                           | Important Note                                                                                               |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Add load balancer              | A new load balancer is configured. If `vrrp_ip` is present, then all the Keepalived nodes are reconfigured and restarted.                                 | Kubernetes installation should not start. Keepalived installation should start only if `vrrp_ip` is present. |
+| Add load balancer + Keepalived | A new load balancer is configured. Keepalived is installed and configured on all the load balancers.                                                      | Kubernetes installation should not start.                                                                    |
+| Add control-plane              | Kubernetes is installed only on a new node. A new control-plane is added to the Kubernetes cluster, and all Haproxy nodes are reconfigured and restarted. | Haproxy and Keepalived installation should not start.                                                        |
+| Add worker                     | Kubernetes is installed only on a new node. A new worker is added to the Kubernetes cluster, and all Haproxy nodes are reconfigured and restarted.        | Haproxy and Keepalived installation should not start.                                                        |
 
 Also pay attention to the following:
 
-* Thirdparties, if any, should be installed only on new nodes. They should not be installed or updated on other nodes.
-* Packages should be installed only on new nodes, and can be upgraded if the upgrade is available. Nodes that are already present in the cluster should not install or update the packages. Before running the procedure, refer to the details about the `cache_versions` option under `associations` section in the installation procedure. 
-* Configs should be generated and applied only to new nodes. The only exceptions are balancers and Keepalived.
-* Plugins are not reinstalled.
-* System configurations like `selinux`, `modprobe`, `sysctl`, and others should be verified and configured only on new nodes.
-* Only new nodes can be rebooted.
-* The file `/etc/hosts` is updated and uploaded to all nodes in the cluster.
-* If there are some offline workers during the procedure, you should exclude `prepare.dns.etc_hosts` task and update `/etc/hosts` on new nodes manually.
+- Thirdparties, if any, should be installed only on new nodes. They should not be installed or updated on other nodes.
+- Packages should be installed only on new nodes, and can be upgraded if the upgrade is available. Nodes that are already present in the cluster should not install or update the packages. Before running the procedure, refer to the details about the `cache_versions` option under `associations` section in the installation procedure.
+- Configs should be generated and applied only to new nodes. The only exceptions are balancers and Keepalived.
+- Plugins are not reinstalled.
+- System configurations like `selinux`, `modprobe`, `sysctl`, and others should be verified and configured only on new nodes.
+- Only new nodes can be rebooted.
+- The file `/etc/hosts` is updated and uploaded to all nodes in the cluster.
+- If there are some offline workers during the procedure, you should exclude `prepare.dns.etc_hosts` task and update `/etc/hosts` on new nodes manually.
 
 **Note**: It is not possible to change a node's role by adding an existing node again with a new role. You have to remove the node and add it again.
 
@@ -832,12 +844,12 @@ nodes:
 
 **Note**:
 
-* The connection information for new nodes can be used from defaults as described in the [Kubemarine Inventory Node Defaults](Installation.md#nodedefaults) section in _Kubemarine Installation Procedure_. If the connection information is not present by default, define the information in each new node configuration.
-* If you intend to add a new `balancer` node with VRRP IP, and have previously not configured the `vrrp_ips` section, you need to do the following preliminarily:
-  * And the section to the main `cluster.yaml`.
-  * If you already have balancers without VRRP IPs, reconfigure the balancers and DNS,
+- The connection information for new nodes can be used from defaults as described in the [Kubemarine Inventory Node Defaults](Installation.md#nodedefaults) section in _Kubemarine Installation Procedure_. If the connection information is not present by default, define the information in each new node configuration.
+- If you intend to add a new `balancer` node with VRRP IP, and have previously not configured the `vrrp_ips` section, you need to do the following preliminarily:
+  - And the section to the main `cluster.yaml`.
+  - If you already have balancers without VRRP IPs, reconfigure the balancers and DNS,
     for example, using `kubemarine install --tasks prepare.dns.etc_hosts,deploy.loadbalancer.haproxy.configure,deploy.loadbalancer.keepalived,deploy.coredns`.
-* If you intend to add a new `balancer` node with VRRP IP, and have previously configured the `vrrp_ips` section in the `cluster.yaml` with the `hosts` subsection, then add the new balancer node to the `vrrp_ips.*.hosts` section in the `cluster.yaml` in the same way as the old balancer nodes if this new node has to share the same VRRP IP address.
+- If you intend to add a new `balancer` node with VRRP IP, and have previously configured the `vrrp_ips` section in the `cluster.yaml` with the `hosts` subsection, then add the new balancer node to the `vrrp_ips.*.hosts` section in the `cluster.yaml` in the same way as the old balancer nodes if this new node has to share the same VRRP IP address.
 
 For example, if you want `new-balancer-node-1` to be added to a subset of balancer nodes that share VRRP IP `192.168.0.100`:
 
@@ -858,75 +870,75 @@ It may be useful, if you have some VRRP IPs working at different subsets of bala
 
 The `add_node` procedure executes the following sequence of tasks:
 
-* cache_packages
-* prepare
-  * check
-    * sudoer
-    * system
-    * cluster_installation
-  * dns
-    * hostname
-    * etc_hosts
-    * resolv_conf
-  * package_manager
-    * configure
-    * disable_unattended_upgrades
-    * manage_packages
-  * ntp
-    * chrony
-    * timesyncd
-  * system
-    * setup_selinux
-    * setup_apparmor
-    * disable_firewalld
-    * disable_swap
-    * modprobe
-    * sysctl
-    * audit
-      * install
-      * configure
-  * **cri**
-    * **install** 
-    * **configure**
-  * thirdparties
-* deploy
-  * loadbalancer
-    * haproxy
-      * install
-      * configure
-    * keepalived
-      * install
-      * configure
-  * kubernetes
-    * reset
-    * install
-    * prepull_images
-    * init (as join)
-    * audit
-  * coredns
-  * plugins
-* overview
+- cache_packages
+- prepare
+  - check
+    - sudoer
+    - system
+    - cluster_installation
+  - dns
+    - hostname
+    - etc_hosts
+    - resolv_conf
+  - package_manager
+    - configure
+    - disable_unattended_upgrades
+    - manage_packages
+  - ntp
+    - chrony
+    - timesyncd
+  - system
+    - setup_selinux
+    - setup_apparmor
+    - disable_firewalld
+    - disable_swap
+    - modprobe
+    - sysctl
+    - audit
+      - install
+      - configure
+  - **cri**
+    - **install**
+    - **configure**
+  - thirdparties
+- deploy
+  - loadbalancer
+    - haproxy
+      - install
+      - configure
+    - keepalived
+      - install
+      - configure
+  - kubernetes
+    - reset
+    - install
+    - prepull_images
+    - init (as join)
+    - audit
+  - coredns
+  - plugins
+- overview
 
 ## Remove Node Procedure
 
-The `remove_node` procedure removes nodes from the existing Kubernetes cluster. It is possible to remove several nodes with different combination of roles at a time. 
+The `remove_node` procedure removes nodes from the existing Kubernetes cluster. It is possible to remove several nodes with different combination of roles at a time.
 
 The procedure works as follows:
 
-|Case|Expected Result|Important Note|
-|---|---|---|
-|Remove load balancer|Haproxy and Keepalived are disabled on removed nodes. Keepalived is reconfigured on all balancers.|Keepalived installation should not start.|
-|Remove control-plane|Kubernetes node is deleted from the cluster and Haproxy is reconfigured on all balancers.|Haproxy and Keepalived installation should not start. Keepalived should not be reconfigured.|
-|Remove worker|Kubernetes node is deleted from the cluster and Haproxy is reconfigured on all balancers.|Haproxy and Keepalived installation should not start. Keepalived should not be reconfigured.|
+| Case                 | Expected Result                                                                                    | Important Note                                                                               |
+| -------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Remove load balancer | Haproxy and Keepalived are disabled on removed nodes. Keepalived is reconfigured on all balancers. | Keepalived installation should not start.                                                    |
+| Remove control-plane | Kubernetes node is deleted from the cluster and Haproxy is reconfigured on all balancers.          | Haproxy and Keepalived installation should not start. Keepalived should not be reconfigured. |
+| Remove worker        | Kubernetes node is deleted from the cluster and Haproxy is reconfigured on all balancers.          | Haproxy and Keepalived installation should not start. Keepalived should not be reconfigured. |
 
 Also pay attention to the following:
 
-* The `vrrp_ips` section is not touched.
+- The `vrrp_ips` section is not touched.
   If it specifies some hosts to enable the Keepalived on, and some of these hosts no longer exist,
   such hosts are ignored with warnings.
-* The file `/etc/hosts` is updated and uploaded to all remaining nodes in the cluster. The control plane address may change.
-* This procedure only removes nodes and does not restore nodes to their original state. Packages, configurations, and Thirdparties are also not deleted.
-* If there are some offline workers during the procedure, you should exclude `update.etc_hosts` task.
+- The file `/etc/hosts` is updated and uploaded to all remaining nodes in the cluster. The control plane address may change.
+- This procedure only removes nodes and does not restore nodes to their original state. Packages, configurations, and Thirdparties are also not deleted.
+- If there are some offline workers during the procedure, you should exclude `update.etc_hosts` task.
 
 Removing a node from a Kubernetes cluster is done in the following order:
 
@@ -934,7 +946,7 @@ Removing a node from a Kubernetes cluster is done in the following order:
 1. The ETCD member is stopped and removed from the ETCD cluster.
 1. Kubelet is stopped.
 1. ETCD and Kubernetes data is deleted.
-1. Containers are stopped and deleted. Images are deleted and container runtime is entirely pruned. 
+1. Containers are stopped and deleted. Images are deleted and container runtime is entirely pruned.
 1. Kubernetes node is deleted from the Kubernetes cluster.
 
 **Warning**: To prevent the loss of the modified CoreDNS configuration (in case the configuration was modified by the cloud administrator and etc) - you must specify this CoreDNS configuration in the `cluster.yaml`, otherwise the configuration will be lost.
@@ -974,19 +986,19 @@ nodes:
 
 The `remove_node` procedure executes the following sequence of tasks:
 
-* loadbalancer
-  * remove
-    * haproxy
-    * keepalived
-  * configure
-    * haproxy
-    * keepalived
-* update
-  * etc_hosts
-  * coredns
-  * plugins
-* remove_kubernetes_nodes
-* overview
+- loadbalancer
+  - remove
+    - haproxy
+    - keepalived
+  - configure
+    - haproxy
+    - keepalived
+- update
+  - etc_hosts
+  - coredns
+  - plugins
+- remove_kubernetes_nodes
+- overview
 
 ## Operating System Migration
 
@@ -1122,7 +1134,7 @@ services:
         patch:
           authorization-webhook-cache-authorized-ttl: 30s
     scheduler:
-      - nodes: [master-2,master-3]
+      - nodes: [master-2, master-3]
         patch:
           profiling: true
     kubelet:
@@ -1204,6 +1216,7 @@ and run PaaS check, namely [232 Kernel Parameters Configuration](Kubecheck.md#23
 It is possible to **append** new [patches](Installation.md#patches) to the main **cluster.yaml**, and trigger reconfiguring of the corresponding services.
 
 The following sections are supported in the new patches:
+
 - `services.sysctl`
 
 Since the new patches are appended, the same settings have precedence in the last patch of the procedure inventory if overridden few times for the same node.
@@ -1222,10 +1235,11 @@ The `reconfigure` procedure executes the following sequence of tasks:
 ## Manage PSS Procedure
 
 The manage PSS procedure allows:
-* enable/disable PSS
-* change default settings
-* change exemptions
-* set PSS labels on namespaces
+
+- enable/disable PSS
+- change default settings
+- change exemptions
+- set PSS labels on namespaces
 
 ### Configure Manage PSS Procedure
 
@@ -1271,24 +1285,25 @@ pss:
 restart-pods: false
 ```
 
-The following sections are optional: `defaults`, `exemptions`, `namespaces`. The `namespaces` section describes the list of 
+The following sections are optional: `defaults`, `exemptions`, `namespaces`. The `namespaces` section describes the list of
 namespaces that will be labeled during the maintenance procedure. The `restart-pods` options enforce restart all pods in cluster.
-The `namespaces_defaults` option is useful for bulk labels setting. In case of `namespaces_defaults` is set labels in `namespaces` 
-section may be omitted. The labels from `namespaces_defaults` will be applied on namespaces list from `namespaces` then any labels 
+The `namespaces_defaults` option is useful for bulk labels setting. In case of `namespaces_defaults` is set labels in `namespaces`
+section may be omitted. The labels from `namespaces_defaults` will be applied on namespaces list from `namespaces` then any labels
 from particular namespaces will be applied.
 
 **Warnings**:
-* Be careful with the `exemptions` section it may cause cluster instability.
-* Do not delete `kube-system` namespace from `exemptions` list without strong necessity.
-* The PSS labels in namespaces for Kubemarine supported plugins ('nginx-ingress-controller', 'local-path-provisioner', 
-'kubernetes-dashboard', and 'calico' (calico-apiserver)) are managed automatically.
-They are deleted during the procedure in case of using `pod-security: disabled`, and changed accordingly in case `pss.defaults.enforce` is changed.
-* Be careful with the `restart-pods: true` options it drains nodes one by one and may cause cluster instability. The best way to 
-restart pods in cluster is a manual restart according to particular application. The restart procedure should consider if the 
-application is stateless or stateful. Also shouldn't use `restart-pod: true` option if [Pod Disruption Budget](https://kubernetes.io/docs/tasks/run-application/configure-pdb/) is configured.
-* Pay attention to the fact that PSS is implicitly enabled by default (that is reflected in 
-`kube-apiserver` [Feature Gates](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/) prior to Kubernetes v1.28).
-Therefore, all PSS labels on namespaces should be deleted during the maintenance procedure so as not to face unpredictable cluster behavior.
+
+- Be careful with the `exemptions` section it may cause cluster instability.
+- Do not delete `kube-system` namespace from `exemptions` list without strong necessity.
+- The PSS labels in namespaces for Kubemarine supported plugins ('nginx-ingress-controller', 'local-path-provisioner',
+  'kubernetes-dashboard', and 'calico' (calico-apiserver)) are managed automatically.
+  They are deleted during the procedure in case of using `pod-security: disabled`, and changed accordingly in case `pss.defaults.enforce` is changed.
+- Be careful with the `restart-pods: true` options it drains nodes one by one and may cause cluster instability. The best way to
+  restart pods in cluster is a manual restart according to particular application. The restart procedure should consider if the
+  application is stateless or stateful. Also shouldn't use `restart-pod: true` option if [Pod Disruption Budget](https://kubernetes.io/docs/tasks/run-application/configure-pdb/) is configured.
+- Pay attention to the fact that PSS is implicitly enabled by default (that is reflected in
+  `kube-apiserver` [Feature Gates](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/) prior to Kubernetes v1.28).
+  Therefore, all PSS labels on namespaces should be deleted during the maintenance procedure so as not to face unpredictable cluster behavior.
 
 ### Manage PSS Tasks Tree
 
@@ -1313,8 +1328,8 @@ For more information, see [Validation by JSON Schemas](Installation.md#inventory
 
 The parameter allows you to forcefully specify what type of reboot to perform. Possible values:
 
-* `False` - All cluster nodes are forced to restart at the same time and immediately. This is a quick operation. If you have a cluster installed, this causes it to be temporarily unavailable.
-* `True` - All cluster nodes are rebooted, pods drained to other nodes and rebooted one after another, after which the pods are scheduled back to the nodes. This is a very long operation. This procedure should not cause the cluster to be unavailable, but may slow down some applications in the cluster.
+- `False` - All cluster nodes are forced to restart at the same time and immediately. This is a quick operation. If you have a cluster installed, this causes it to be temporarily unavailable.
+- `True` - All cluster nodes are rebooted, pods drained to other nodes and rebooted one after another, after which the pods are scheduled back to the nodes. This is a very long operation. This procedure should not cause the cluster to be unavailable, but may slow down some applications in the cluster.
 
 Example:
 
@@ -1333,15 +1348,14 @@ nodes:
   - name: control-plane-3
 ```
 
-
 ## Certificate Renew Procedure
 
-The `cert_renew` procedure allows you to renew some certificates on an existing Kubernetes cluster. 
+The `cert_renew` procedure allows you to renew some certificates on an existing Kubernetes cluster.
 
-For Kubernetes, most of the internal certificates could be updated, specifically: 
+For Kubernetes, most of the internal certificates could be updated, specifically:
 `apiserver`, `apiserver-etcd-client`, `apiserver-kubelet-client`, `etcd-healthcheck-client`, `etcd-peer`, `etcd-server`,
-`admin.conf`, `super-admin.conf`, `controller-manager.conf`, `scheduler.conf`, `front-proxy-client`. 
-Certificate used by `kubelet.conf` by default is updated automatically by Kubernetes, 
+`admin.conf`, `super-admin.conf`, `controller-manager.conf`, `scheduler.conf`, `front-proxy-client`.
+Certificate used by `kubelet.conf` by default is updated automatically by Kubernetes,
 link to Kubernetes docs regarding `kubelet.conf` rotation: https://kubernetes.io/docs/tasks/tls/certificate-rotation/#understanding-the-certificate-rotation-configuration.
 
 **Note**: Each time you run this procedure, kubelet and all control plane containers are restarted.
@@ -1402,6 +1416,7 @@ you may want to repeat the corresponding steps using [Plugins Reinstallation](In
 #### Configuring Certificate Renew Procedure for Kubernetes Internal Certificates
 
 To update internal Kubernetes certificates you can use the following configuration:
+
 ```yaml
 kubernetes:
   cert-list:
@@ -1417,8 +1432,10 @@ kubernetes:
     - scheduler.conf
     - front-proxy-client
 ```
+
 Above list contains all possible certificates for update. You can pick all or some of them, as you need.
 Alternatively to specifying the full list, you can use shorter form:
+
 ```yaml
 kubernetes:
   cert-list:
@@ -1427,7 +1444,7 @@ kubernetes:
 
 ### Certificate Renew Tasks Tree
 
-The `cert_renew` procedure executes the following sequence of tasks: 
+The `cert_renew` procedure executes the following sequence of tasks:
 
 1. kubernetes
 2. nginx_ingress_controller
@@ -1436,7 +1453,7 @@ The `cert_renew` procedure executes the following sequence of tasks:
 
 # Procedure Execution
 
-The following sections describe the execution of procedures using CLI. 
+The following sections describe the execution of procedures using CLI.
 
 ## Procedure Execution from CLI
 
@@ -1444,10 +1461,10 @@ The command line executive for maintenance procedures has the same parameters as
 
 The following features described in the _Kubemarine Installation Procedure_ are also available for maintenance procedures:
 
-* [Custom Inventory File Location](Installation.md#custom-inventory-file-location)
-* [Tasks List Redefinition](Installation.md#tasks-list-redefinition)
-* [Ansible Inventory](Installation.md#ansible-inventory)
-* [Dump Files](Installation.md#dump-files)
+- [Custom Inventory File Location](Installation.md#custom-inventory-file-location)
+- [Tasks List Redefinition](Installation.md#tasks-list-redefinition)
+- [Ansible Inventory](Installation.md#ansible-inventory)
+- [Dump Files](Installation.md#dump-files)
 
 For maintenance procedures, it is mandatory to provide procedure-specific **procedure.yaml** configuration as positional argument, in addition to an ordinary **cluster.yaml** cluster inventory. You can redefine the tasks list for execution/exclusion according to the selected procedure Tasks Tree. For more information, refer to the [Tasks List Redefinition](Installation.md#tasks-list-redefinition) section in _Kubemarine Installation Procedure_.
 
@@ -1467,7 +1484,7 @@ An example for running `remove_node` procedure with explicit **cluster.yaml** is
 
 ```bash
 kubemarine remove_node procedure.yaml --config="${PATH_TO_CONFIG}/cluster.yaml"
-``` 
+```
 
 An example for running the `add_node` procedure with overridden tasks is as follows:
 
@@ -1483,27 +1500,30 @@ For more information, refer to the [Configuring Kubemarine Logging](Logging.md) 
 ## Inventory Preservation
 
 The Kubemarine collects information about each `successful` procedure operation with the cluster and stores it on all master nodes under the following path:
+
 ```
 /etc/kubemarine/procedure/`<timestamp_procedure-name>`/
 ```
+
 The list of preserved information:
+
 ```yaml
 cluster.yaml
 version
 dump/
-  cluster.yaml
-  cluster_initial.yaml
-  procedure.yaml
-  cluster_finalized.yaml
-  cluster_precompiled.yaml
-  procedure_parameters
+cluster.yaml
+cluster_initial.yaml
+procedure.yaml
+cluster_finalized.yaml
+cluster_precompiled.yaml
+procedure_parameters
 ```
 
 Description of the following files:
-* cluster.yaml - Input cluster inventory
-* version -  Kubemarine version
-* procedure_parameters - List of finished tasks
 
+- cluster.yaml - Input cluster inventory
+- version - Kubemarine version
+- procedure_parameters - List of finished tasks
 
 ## Additional Parameters
 
@@ -1535,26 +1555,24 @@ prepull_group_size: 100
 
 # Additional Procedures
 
-The following Kubemarine procedures are available additionally: 
-- `version`      Print current release version
-- `do`           Execute shell command on cluster nodes
+The following Kubemarine procedures are available additionally:
+
+- `version` Print current release version
+- `do` Execute shell command on cluster nodes
 
 ## Changing Calico Settings
-	
+
 Sometimes, during the operation you have to change the parameters of the Calico plugin. To do this, you can use the standard Kubemarine tools.
-	
 **Warning**: This procedure is performed on all nodes.
-	
 The parameters are changed using the command, **kubemarine install --config='file' --tasks=deploy.plugins**.
-	
 Before the installation, you have to change the yaml file responsible for the cluster deployment:
-	
+
 ```
 plugins:
   calico:
     install: true
     version: v3.10.1
-	
+
 ```
 
 ## Changing Cluster CIDR
@@ -1565,11 +1583,12 @@ There might be a situation when you have to change the pod network used in a clu
 For example, it is not recommended to use networks from deprecated Site-Local scoped address prefix (fec0::/10). It is better to use the Unique Local Unicast range (fc00::/7).
 
 If you are going to deploy a cluster from scratch, you can set custom `podSubnet` in the cluster.yaml:
+
 ```yaml
 services:
   kubeadm:
     networking:
-      podSubnet: '<NEW_NETWORK>'
+      podSubnet: "<NEW_NETWORK>"
 ```
 
 If an existing cluster has to be updated with a new `podSubnet`, the following steps should be considered:
@@ -1577,6 +1596,7 @@ If an existing cluster has to be updated with a new `podSubnet`, the following s
 1. Check that any network security policies are disabled or new podSubnet is whitelisted. This is especially important for OpenStack environments.
 
 2. Create an _ippool_ for new podSubnet:
+
 ```console
 # cat <<EOF | calicoctl apply -f -
 apiVersion: projectcalico.org/v3
@@ -1593,6 +1613,7 @@ EOF
 **Note**: The pod subnet mask size for a node cannot be greater than 16, more than the cluster mask size. This is especially important for IPv6 networks. The default `node-cidr-mask-size` for IPv6 is `64`. Therefore, you should use a cluster network mask not shorter than 48 or change the `node-cidr-mask-size` value respectively.
 
 3. Disable the old _ippool_:
+
 ```console
 # calicoctl get ippool -o yaml > ./ippools.yaml
 # vi ippools.yaml
@@ -1608,23 +1629,27 @@ EOF
 ```
 
 4. Change the `podCIDR` parameter for all nodes:
+
 ```console
 # export NODENAME=<NODENAME>
 # kubectl get node ${NODENAME} -o yaml > ${NODENAME}.yaml
 # sed -i "s~OLD_NODENET~NEW_NODENET~" ${NODENAME}.yaml
 # kubectl delete node ${NODENAME} && kubectl create -f ${NODENAME}.yaml
-``` 
+```
 
 5. Change `cluster-cidr` in kube-controller-manager manifest at all the master nodes:
+
 ```console
 # vi /etc/kubernetes/manifests/kube-controller-manager.yaml
 ...
     - --cluster-cidr=10.228.0.0/14
 ...
 ```
+
 After changing the manifest, the kube-controller-manager pod restarts automatically. Check that it has restarted successfully.
 
 6. Edit the `calico-config` configmap, remove the old ippool name, and change the ip range:
+
 ```console
 # kubectl -n kube-system edit cm calico-config
 ...
@@ -1633,15 +1658,18 @@ After changing the manifest, the kube-controller-manager pod restarts automatica
 ```
 
 7. Edit the `calico-node` daemonset, and change the ip range:
+
 ```console
 # kubectl -n kube-system edit ds calico-node
 ...
         - name: CALICO_IPV4POOL_CIDR
           value: 10.228.0.0/14
 ```
+
 Check whether all `calico-node` pods have restarted successfully.
 
 8. Change `clusterCIDR` in the `kube-proxy` configmap and restart kube-proxy:
+
 ```console
 # kubectl -n kube-system edit cm kube-proxy
 ...
@@ -1653,6 +1681,7 @@ Check whether all `calico-node` pods have restarted successfully.
 9. Delete pods with ip addresses from the old ippool and check that they have restarted with addresses from the new pool successfully.
 
 10. Update the `kubeadm-config` configmap with a new cluster network:
+
 ```console
 # kubectl -n kube-system edit cm kubeadm-config
 data:
