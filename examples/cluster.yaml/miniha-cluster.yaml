@@ -1,10 +1,10 @@
 node_defaults:
   keyfile: "/home/username/.ssh/id_rsa"
-  password: '{{ env.PASS }}'     #Either keyfile or password can be used.
+  password: "{{ env.PASS }}" #Either keyfile or password can be used.
   username: "centos"
 
 vrrp_ips:
-- 192.168.0.250
+  - 192.168.0.250
 
 nodes:
   - name: "k8s-control-plane-1"
