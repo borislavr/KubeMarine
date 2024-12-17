@@ -11,7 +11,7 @@ kubernetes_versions:
   v1.31:
     supported: true
 compatibility_map:
-# This section should be changed manually.
+  # This section should be changed manually.
   v1.27.1:
     calico: v3.26.4
     nginx-ingress-controller: v1.8.4

@@ -1,15 +1,15 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
   "allOf": [
-    {"$ref": "common/node_ref.json#/definitions/AnyOfNodesGroupsSpec"},
-    {"$ref": "#/definitions/Patch"}
+    { "$ref": "common/node_ref.json#/definitions/AnyOfNodesGroupsSpec" },
+    { "$ref": "#/definitions/Patch" }
   ],
   "definitions": {
     "Patch": {
       "type": "object",
       "properties": {
-        "groups": {"$ref": "#/definitions/PatchGroups"},
-        "nodes": {"$ref": "#/definitions/PatchNodes"},
+        "groups": { "$ref": "#/definitions/PatchGroups" },
+        "nodes": { "$ref": "#/definitions/PatchNodes" },
         "services": {
           "type": "object",
           "description": "Configure settings of different services",
@@ -25,12 +25,12 @@
       "additionalProperties": false
     },
     "PatchGroups": {
-      "allOf": [{"$ref": "common/node_ref.json#/definitions/Roles"}],
+      "allOf": [{ "$ref": "common/node_ref.json#/definitions/Roles" }],
       "default": ["worker", "control-plane", "balancer"],
       "description": "The list of group names to apply the patch to"
     },
     "PatchNodes": {
-      "allOf": [{"$ref": "common/node_ref.json#/definitions/Names"}],
+      "allOf": [{ "$ref": "common/node_ref.json#/definitions/Names" }],
       "description": "The list of node names to apply the patch to"
     }
   }
