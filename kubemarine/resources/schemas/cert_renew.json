@@ -35,10 +35,16 @@
           "items": {
             "enum": [
               "all",
-              "apiserver", "apiserver-etcd-client", "apiserver-kubelet-client",
-              "etcd-healthcheck-client", "etcd-peer", "etcd-server",
-              "admin.conf", "super-admin.conf",
-              "controller-manager.conf", "scheduler.conf",
+              "apiserver",
+              "apiserver-etcd-client",
+              "apiserver-kubelet-client",
+              "etcd-healthcheck-client",
+              "etcd-peer",
+              "etcd-server",
+              "admin.conf",
+              "super-admin.conf",
+              "controller-manager.conf",
+              "scheduler.conf",
               "front-proxy-client"
             ]
           },

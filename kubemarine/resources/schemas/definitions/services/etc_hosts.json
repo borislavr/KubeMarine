@@ -17,8 +17,8 @@
     "DNSNames": {
       "description": "IP-address",
       "oneOf": [
-        {"type": "string"},
-        {"$ref": "../common/utils.json#/definitions/MergeableSetOfStrings"}
+        { "type": "string" },
+        { "$ref": "../common/utils.json#/definitions/MergeableSetOfStrings" }
       ]
     }
   }
