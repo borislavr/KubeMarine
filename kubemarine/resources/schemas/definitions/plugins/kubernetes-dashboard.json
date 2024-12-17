@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema",
   "type": "object",
   "description": "Enable and/or change default settings for 'kubernetes-dashboard' plugin",
-  "allOf": [{"$ref": "generic_plugin.json#/definitions/Properties"}],
+  "allOf": [{ "$ref": "generic_plugin.json#/definitions/Properties" }],
   "properties": {
     "version": {
       "type": "string"
@@ -60,12 +60,18 @@
           "type": "object",
           "description": "Ingress metadata, typically contains namespace and NGINX-specific parameters",
           "properties": {
-            "name": {"type": "string", "default": "kubernetes-dashboard"},
-            "namespace": {"type": "string", "default": "kubernetes-dashboard"},
+            "name": { "type": "string", "default": "kubernetes-dashboard" },
+            "namespace": {
+              "type": "string",
+              "default": "kubernetes-dashboard"
+            },
             "annotations": {
               "type": "object",
               "properties": {
-                "nginx.ingress.kubernetes.io/backend-protocol": {"type": "string", "default": "HTTPS"}
+                "nginx.ingress.kubernetes.io/backend-protocol": {
+                  "type": "string",
+                  "default": "HTTPS"
+                }
               }
             }
           }
@@ -74,8 +80,12 @@
           "type": "object",
           "description": "Ingress specs, determining where and on which port the Kubernetes Dashboard UI is located",
           "properties": {
-            "tls": {"$ref": "../common/utils.json#/definitions/MergeableArrayOfObjects"},
-            "rules": {"$ref": "../common/utils.json#/definitions/MergeableArrayOfObjects"}
+            "tls": {
+              "$ref": "../common/utils.json#/definitions/MergeableArrayOfObjects"
+            },
+            "rules": {
+              "$ref": "../common/utils.json#/definitions/MergeableArrayOfObjects"
+            }
           }
         }
       }
@@ -83,8 +93,16 @@
   },
   "propertyNames": {
     "anyOf": [
-      {"$ref": "generic_plugin.json#/definitions/PropertyNames"},
-      {"enum": ["version", "hostname", "dashboard", "metrics-scraper", "ingress"]}
+      { "$ref": "generic_plugin.json#/definitions/PropertyNames" },
+      {
+        "enum": [
+          "version",
+          "hostname",
+          "dashboard",
+          "metrics-scraper",
+          "ingress"
+        ]
+      }
     ]
   }
 }
