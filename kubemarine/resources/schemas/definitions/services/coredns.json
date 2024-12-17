@@ -46,9 +46,11 @@
                 "spec": {
                   "type": "object",
                   "properties": {
-                    "volumes": {"$ref": "../common/utils.json#/definitions/MergeableArrayOfObjects"},
-                    "nodeSelector": {"type": "object"},
-                    "affinity": {"type": "object"}
+                    "volumes": {
+                      "$ref": "../common/utils.json#/definitions/MergeableArrayOfObjects"
+                    },
+                    "nodeSelector": { "type": "object" },
+                    "affinity": { "type": "object" }
                   }
                 }
               }
@@ -82,7 +84,7 @@
         "prometheus": {
           "description": "With Prometheus, you export metrics from the CoreDNS and any plugin that has them. The metrics path is fixed to /metrics",
           "oneOf": [
-            {"$ref": "#/definitions/DisableSetting"},
+            { "$ref": "#/definitions/DisableSetting" },
             {
               "type": "string",
               "default": ":9153"
@@ -92,7 +94,7 @@
         "cache": {
           "description": "With cache enabled, all records except zone transfers and metadata records are cached according to the ttl value set",
           "oneOf": [
-            {"$ref": "#/definitions/DisableSetting"},
+            { "$ref": "#/definitions/DisableSetting" },
             {
               "type": "integer",
               "default": 30
@@ -117,8 +119,10 @@
         "forward": {
           "description": "The forward plugin re-uses already opened sockets to the upstreams. It supports UDP, TCP, and DNS-over-TLS. It is used in band health checking.",
           "oneOf": [
-            {"$ref": "#/definitions/DisableSetting"},
-            {"$ref": "../common/utils.json#/definitions/NonEmptyArrayOfStrings"}
+            { "$ref": "#/definitions/DisableSetting" },
+            {
+              "$ref": "../common/utils.json#/definitions/NonEmptyArrayOfStrings"
+            }
           ]
         },
         "rewrite": {
@@ -128,48 +132,54 @@
         "hosts": {
           "description": "The hosts plugin is useful for serving zones from a /etc/hosts like file. It serves from a preloaded file, which is applied from ConfigMap during the installation.",
           "oneOf": [
-            {"$ref": "#/definitions/DisableSetting"},
+            { "$ref": "#/definitions/DisableSetting" },
             {
               "type": "object",
               "properties": {
-                "default": {"$ref": "#/definitions/HostsPluginSection"}
+                "default": { "$ref": "#/definitions/HostsPluginSection" }
               },
-              "additionalProperties": {"$ref": "#/definitions/HostsPluginSection"}
+              "additionalProperties": {
+                "$ref": "#/definitions/HostsPluginSection"
+              }
             }
           ]
         },
         "kubernetes": {
           "description": "This plugin implements the Kubernetes DNS-Based Service Discovery Specification",
           "oneOf": [
-            {"$ref": "#/definitions/DisableSetting"},
+            { "$ref": "#/definitions/DisableSetting" },
             {
               "type": "object",
               "properties": {
-                "default": {"$ref": "#/definitions/KubernetesPluginSection"}
+                "default": { "$ref": "#/definitions/KubernetesPluginSection" }
               },
-              "additionalProperties": {"$ref": "#/definitions/KubernetesPluginSection"}
+              "additionalProperties": {
+                "$ref": "#/definitions/KubernetesPluginSection"
+              }
             }
           ]
         },
         "template": {
           "description": "The template plugin allows you to dynamically respond to queries by just writing a template",
           "oneOf": [
-            {"$ref": "#/definitions/DisableSetting"},
+            { "$ref": "#/definitions/DisableSetting" },
             {
               "type": "object",
               "properties": {
-                "default": {"$ref": "#/definitions/TemplatePluginSection"},
-                "reject-aaaa": {"$ref": "#/definitions/TemplatePluginSection"}
+                "default": { "$ref": "#/definitions/TemplatePluginSection" },
+                "reject-aaaa": { "$ref": "#/definitions/TemplatePluginSection" }
               },
-              "additionalProperties": {"$ref": "#/definitions/TemplatePluginSection"}
+              "additionalProperties": {
+                "$ref": "#/definitions/TemplatePluginSection"
+              }
             }
           ]
         }
       },
       "additionalProperties": {
         "oneOf": [
-          {"type": ["string", "integer", "boolean"]},
-          {"$ref": "#/definitions/CustomPlugin"}
+          { "type": ["string", "integer", "boolean"] },
+          { "$ref": "#/definitions/CustomPlugin" }
         ]
       }
     },
@@ -181,7 +191,7 @@
       "type": "object",
       "additionalProperties": {
         "type": "object",
-        "allOf": [{"$ref": "#/definitions/GenericPluginSection"}],
+        "allOf": [{ "$ref": "#/definitions/GenericPluginSection" }],
         "required": ["data"],
         "propertyNames": {
           "$ref": "#/definitions/GenericPluginSectionPropertyNames"
@@ -190,52 +200,56 @@
     },
     "HostsPluginSection": {
       "type": "object",
-      "allOf": [{"$ref": "#/definitions/GenericPluginSection"}],
+      "allOf": [{ "$ref": "#/definitions/GenericPluginSection" }],
       "properties": {
-        "file": {"type": "string", "default": "/etc/coredns/Hosts"}
+        "file": { "type": "string", "default": "/etc/coredns/Hosts" }
       },
       "propertyNames": {
         "anyOf": [
-          {"$ref": "#/definitions/GenericPluginSectionPropertyNames"},
-          {"enum": ["file"]}
+          { "$ref": "#/definitions/GenericPluginSectionPropertyNames" },
+          { "enum": ["file"] }
         ]
       }
     },
     "KubernetesPluginSection": {
       "type": "object",
-      "allOf": [{"$ref": "#/definitions/GenericPluginSection"}],
+      "allOf": [{ "$ref": "#/definitions/GenericPluginSection" }],
       "properties": {
         "zone": {
           "oneOf": [
-            {"type": "string"},
-            {"$ref": "../common/utils.json#/definitions/NonEmptyArrayOfStrings"}
+            { "type": "string" },
+            {
+              "$ref": "../common/utils.json#/definitions/NonEmptyArrayOfStrings"
+            }
           ]
         }
       },
       "propertyNames": {
         "anyOf": [
-          {"$ref": "#/definitions/GenericPluginSectionPropertyNames"},
-          {"enum": ["zone"]}
+          { "$ref": "#/definitions/GenericPluginSectionPropertyNames" },
+          { "enum": ["zone"] }
         ]
       }
     },
     "TemplatePluginSection": {
       "type": "object",
-      "allOf": [{"$ref": "#/definitions/GenericPluginSection"}],
+      "allOf": [{ "$ref": "#/definitions/GenericPluginSection" }],
       "properties": {
         "zone": {
           "oneOf": [
-            {"type": "string"},
-            {"$ref": "../common/utils.json#/definitions/NonEmptyArrayOfStrings"}
+            { "type": "string" },
+            {
+              "$ref": "../common/utils.json#/definitions/NonEmptyArrayOfStrings"
+            }
           ]
         },
-        "class": {"type": "string"},
-        "type": {"type": "string"}
+        "class": { "type": "string" },
+        "type": { "type": "string" }
       },
       "propertyNames": {
         "anyOf": [
-          {"$ref": "#/definitions/GenericPluginSectionPropertyNames"},
-          {"enum": ["zone", "class", "type"]}
+          { "$ref": "#/definitions/GenericPluginSectionPropertyNames" },
+          { "enum": ["zone", "class", "type"] }
         ]
       }
     },

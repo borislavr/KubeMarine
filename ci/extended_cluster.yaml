@@ -3,24 +3,24 @@ node_defaults:
   username: runner
 
 nodes:
-- name: "node-all-in-one"
-  address: "172.17.0.1"
-  internal_address: "172.17.0.1"
-  roles: ["balancer", "control-plane", "worker"]
-  labels:
-    test-label: label
+  - name: "node-all-in-one"
+    address: "172.17.0.1"
+    internal_address: "172.17.0.1"
+    roles: ["balancer", "control-plane", "worker"]
+    labels:
+      test-label: label
 
 vrrp_ips:
-- ip: "172.17.1.1"
+  - ip: "172.17.1.1"
 
 cluster_name: "test-local-k8s.com"
 
 services:
   packages:
     install:
-    - ethtool
-    - ebtables
-    - socat
+      - ethtool
+      - ebtables
+      - socat
   etc_hosts:
     172.17.1.1:
       - dashboard.test-local-k8s.com
@@ -34,9 +34,9 @@ plugins:
       nodeSelector:
         test-label: label
       tolerations:
-      - key: node-role.kubernetes.io/test-example
-        operator: Exists
-        effect: NoSchedule
+        - key: node-role.kubernetes.io/test-example
+          operator: Exists
+          effect: NoSchedule
   local-path-provisioner:
     install: true
   calico:
@@ -48,11 +48,11 @@ plugins:
 
 rbac:
   accounts:
-  - name: superadmin
-    role: cluster-admin
-  - name: basic-user
-    role: system:basic-user
-    namespace: kube-system
+    - name: superadmin
+      role: cluster-admin
+    - name: basic-user
+      role: system:basic-user
+      namespace: kube-system
   admission: pss
   pss:
     pod-security: enabled

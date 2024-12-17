@@ -10,7 +10,9 @@
         "$ref": "definitions/node.json"
       }
     },
-    "prepull_group_size": {"$ref": "definitions/procedures.json#/definitions/PrepullGroupSize"}
+    "prepull_group_size": {
+      "$ref": "definitions/procedures.json#/definitions/PrepullGroupSize"
+    }
   },
   "required": ["nodes"],
   "additionalProperties": false

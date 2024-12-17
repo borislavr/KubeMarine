@@ -3,12 +3,12 @@
   "type": "object",
   "description": "Deliver files from third party sources and install them in the system",
   "properties": {
-    "/usr/bin/etcdctl": {"$ref": "#/definitions/ThirdParty"},
-    "/usr/bin/kubeadm": {"$ref": "#/definitions/ThirdParty"},
-    "/usr/bin/kubelet": {"$ref": "#/definitions/ThirdParty"},
-    "/usr/bin/kubectl": {"$ref": "#/definitions/ThirdParty"},
-    "/usr/bin/calicoctl": {"$ref": "#/definitions/ThirdParty"},
-    "/usr/bin/crictl.tar.gz": {"$ref": "#/definitions/ThirdParty"}
+    "/usr/bin/etcdctl": { "$ref": "#/definitions/ThirdParty" },
+    "/usr/bin/kubeadm": { "$ref": "#/definitions/ThirdParty" },
+    "/usr/bin/kubelet": { "$ref": "#/definitions/ThirdParty" },
+    "/usr/bin/kubectl": { "$ref": "#/definitions/ThirdParty" },
+    "/usr/bin/calicoctl": { "$ref": "#/definitions/ThirdParty" },
+    "/usr/bin/crictl.tar.gz": { "$ref": "#/definitions/ThirdParty" }
   },
   "additionalProperties": {
     "$ref": "#/definitions/ThirdParty"
@@ -32,10 +32,10 @@
     "ThirdParty": {
       "description": "The absolute destination path of the 3rd-party on the host system of the cluster",
       "oneOf": [
-        {"type": "string"},
+        { "type": "string" },
         {
           "type": "object",
-          "allOf": [{"$ref": "#/definitions/MinimalThirdPartyProperties"}],
+          "allOf": [{ "$ref": "#/definitions/MinimalThirdPartyProperties" }],
           "properties": {
             "owner": {
               "type": "string",
@@ -71,8 +71,18 @@
           "required": ["source"],
           "propertyNames": {
             "anyOf": [
-              {"$ref": "#/definitions/MinimalThirdPartyPropertyNames"},
-              {"enum": ["owner", "mode", "unpack", "group", "groups", "node", "nodes"]}
+              { "$ref": "#/definitions/MinimalThirdPartyPropertyNames" },
+              {
+                "enum": [
+                  "owner",
+                  "mode",
+                  "unpack",
+                  "group",
+                  "groups",
+                  "node",
+                  "nodes"
+                ]
+              }
             ]
           }
         }
