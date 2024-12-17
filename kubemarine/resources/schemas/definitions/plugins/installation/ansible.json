@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema",
   "description": "Directly execute Ansible playbooks. Can be either a local path to the playbook or a dictionary with the extra parameters.",
   "oneOf": [
-    {"type": "string", "minLength": 1},
+    { "type": "string", "minLength": 1 },
     {
       "type": "object",
       "properties": {

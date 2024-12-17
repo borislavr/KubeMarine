@@ -7,14 +7,15 @@ Approved
 ## Context
 
 We have [migrate_kubemarine](../Maintenance.md#kubemarine-migration-procedure) procedure,
-but have no stable process to deliver new versions of software (plugin, thirdparties, packages) 
+but have no stable process to deliver new versions of software (plugin, thirdparties, packages)
 that we recommend for existing Kubernetes versions.
 
 ## Decision
 
 The implementation is split into two parts:
+
 1. Automatic and manual registration of what software to upgrade for what Kubernetes versions.
-2. Implementation of upgrade process for each type of software. 
+2. Implementation of upgrade process for each type of software.
    It should be developed once and persisted in Kubemarine sources.
 
 ### Registration
@@ -31,16 +32,17 @@ The file is automatically cleared after new Kubemarine release / iteration.
 ### Procedure
 
 There should be separate patch for each instance of software. The order of upgrade is the following:
-* crictl
-* CRI
-* haproxy
-* keepalived
-* Separate upgrade patch for each plugin according to their default priority.
+
+- crictl
+- CRI
+- haproxy
+- keepalived
+- Separate upgrade patch for each plugin according to their default priority.
 
 If there is nothing to upgrade for the particular instance of software,
 the corresponding patch should not be shown in the list and not executed.
 
-The procedure to upgrade each type of software should be similar to that in 
+The procedure to upgrade each type of software should be similar to that in
 Kubernetes [upgrade](../Maintenance.md#upgrade-procedure) procedure.
 
 #### Patches priority
@@ -70,6 +72,7 @@ new associations must be specified in the procedure inventory.
 
 Configuration from the procedure inventory is merged with the cluster inventory,
 and the upgrade is started with the following steps for each node one by one:
+
 1. drain node
 2. upgrade CRI
 3. remove all containers
