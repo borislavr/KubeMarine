@@ -87,42 +87,41 @@ This section provides information about the Kubecheck functionality.
   - [HTML Report](#html-report)
   - [CSV Report](#csv-report)
 
-
 # Kubernetes Check
 
 The Kubernetes Check procedure provides an opportunity to automatically verify the environment and quickly get a report on the results. The environment is checked against the following criteria, which is defined in advance:
 
-* Minimal - The minimum results that the test environment must meet. If it does not satisfy this, there is no guarantee that this environment will be operational.
-* Recommended - The recommended results in which the test development environment for the Full-HA cluster scheme showed the best results and performance. If you have a production environment, you must independently calculate the number of resources for your cluster. This number is more than that recommended by the Kubernetes Check procedure.
+- Minimal - The minimum results that the test environment must meet. If it does not satisfy this, there is no guarantee that this environment will be operational.
+- Recommended - The recommended results in which the test development environment for the Full-HA cluster scheme showed the best results and performance. If you have a production environment, you must independently calculate the number of resources for your cluster. This number is more than that recommended by the Kubernetes Check procedure.
 
 If the detected test results deviate from the criteria, the following status types are assigned to them:
 
-* **OK** - This status indicates the compliance with the recommended values, if any, and successful completion of the test without errors.
-* **WARN** - This status indicates that the test deviated slightly from the expected values. For example, the results found do not correspond to the recommended values. However, this test passed the minimum requirements and has not failed.
-* **FAIL** - This status indicates that the test does not meet the minimum requirements or it has failed. This test requires attention to fix the environment.
-* **ERROR?** - This status indicates that an internal error occurred in the test and it cannot be continued.
+- **OK** - This status indicates the compliance with the recommended values, if any, and successful completion of the test without errors.
+- **WARN** - This status indicates that the test deviated slightly from the expected values. For example, the results found do not correspond to the recommended values. However, this test passed the minimum requirements and has not failed.
+- **FAIL** - This status indicates that the test does not meet the minimum requirements or it has failed. This test requires attention to fix the environment.
+- **ERROR?** - This status indicates that an internal error occurred in the test and it cannot be continued.
 
 At the end of the logs of the procedure, a summary report table with all the test results is displayed. For example:
 
 ```
            Group    Status   ID    Test                                                               Actual result        Minimal   Recommended
- 
-             SSH      OK     001  Connectivity .......................................................... Connected                             
-             SSH     WARN    002  Latency - Single Thread .................................................. 1500ms          10000          1000
-             SSH     FAIL    003  Latency - Multi Thread .................................................. 50000ms          15000          2000   
 
- OVERALL RESULTS:  1 SUCCEEDED   1 WARNED   1 FAILED  
+             SSH      OK     001  Connectivity .......................................................... Connected
+             SSH     WARN    002  Latency - Single Thread .................................................. 1500ms          10000          1000
+             SSH     FAIL    003  Latency - Multi Thread .................................................. 50000ms          15000          2000
+
+ OVERALL RESULTS:  1 SUCCEEDED   1 WARNED   1 FAILED
 ```
 
 The following columns are presented in this table:
 
-* Group - The logical group of checks to which the test belongs.
-* Status - The final status assigned to the test according to the results of the check.
-* ID - The test identifier.
-* Name - The short test name.
-* Actual result - The actual value detected by the test on the environment.
-* Minimal (optional) - The minimum required value for this test.
-* Recommended (optional) - The recommended required value for this test.
+- Group - The logical group of checks to which the test belongs.
+- Status - The final status assigned to the test according to the results of the check.
+- ID - The test identifier.
+- Name - The short test name.
+- Actual result - The actual value detected by the test on the environment.
+- Minimal (optional) - The minimum required value for this test.
+- Recommended (optional) - The recommended required value for this test.
 
 The final report is generated in a file. For more information, see [Report File Generation](#report-file-generation).
 
@@ -138,8 +137,9 @@ kubemarine check_paas
 It begins the execution of all tasks available in the procedure in accordance with the procedure type. For more information about how a tasks list can be redefined, see [Tasks List Redefinition](Installation.md#tasks-list-redefinition) in _Kubemarine Installation Procedure_.
 
 **Note:** some `paas` checks work only if additional optional configuration file is provided.
-Without additional configuration, such checks will be skipped without warning. 
+Without additional configuration, such checks will be skipped without warning.
 See particular check documentation for configuration format. Following is an example of passing procedure config file:
+
 ```bash
 kubemarine check_paas procedure.yaml
 ```
@@ -154,73 +154,73 @@ The IAAS procedure verifies only the infrastructure. For example, it checks the 
 
 The task tree is as follows:
 
-* ssh
-  * connectivity
-  * latency
-    * single
-    * multiple
-  * sudoer_access
-* network
-  * pod_subnet_connectivity
-  * service_subnet_connectivity
-  * ports_connectivity
-  * vips_connectivity
-  * ipip_connectivity
-* hardware
-  * members_amount
-    * vips
-    * balancers
-    * control-planes
-    * workers
-    * total
-  * cpu
-    * balancers
-    * control-planes
-    * workers
-  * ram
-    * balancers
-    * control-planes
-    * workers
-* system
-  * distributive
-  * fs_mount_options 
-* software
-  * kernel
-    * version
-  * thirdparties
-    * availability
-  * packages
-    * repositories
-    * availability
+- ssh
+  - connectivity
+  - latency
+    - single
+    - multiple
+  - sudoer_access
+- network
+  - pod_subnet_connectivity
+  - service_subnet_connectivity
+  - ports_connectivity
+  - vips_connectivity
+  - ipip_connectivity
+- hardware
+  - members_amount
+    - vips
+    - balancers
+    - control-planes
+    - workers
+    - total
+  - cpu
+    - balancers
+    - control-planes
+    - workers
+  - ram
+    - balancers
+    - control-planes
+    - workers
+- system
+  - distributive
+  - fs_mount_options
+- software
+  - kernel
+    - version
+  - thirdparties
+    - availability
+  - packages
+    - repositories
+    - availability
 
 ##### 001 Connectivity
 
-*Task*: `ssh.connectivity`
+_Task_: `ssh.connectivity`
 
 This test checks whether it is possible to establish the SSH-connection with nodes. If you are unable to connect to the nodes, check and fix the following:
 
-* The credentials for the connection are correct (verify the ip address, user, and key).
-* The node is up.
-* The node is online.
-* The network connection to the node is available.
-* The node port 22 (or other custom, if configured) is open and can be binded.
-* The SSHD is running and its configuration is correct. 
+- The credentials for the connection are correct (verify the ip address, user, and key).
+- The node is up.
+- The node is online.
+- The network connection to the node is available.
+- The node port 22 (or other custom, if configured) is open and can be binded.
+- The SSHD is running and its configuration is correct.
 
 ##### 002 Latency - Single Thread
 
-*Task*: `ssh.latency.single`
+_Task_: `ssh.latency.single`
 
 This test checks the delay between the nodes in the single-threaded mode. The test of the nodes passes one after another.
 
 ##### 003 Latency - Multi Thread
 
-*Task*: `ssh.latency.multiple`
+_Task_: `ssh.latency.multiple`
 
 This test checks the delay between the nodes in the multi-threaded mode. The test of all nodes passes at the same time.
 
 ##### 004 Sudoer Access
 
-*Task*: `ssh.sudoer_access`
+_Task_: `ssh.sudoer_access`
 
 ##### 005 Items Amount
 
@@ -228,31 +228,31 @@ Tests of this type check the availability of the required amount of resources.
 
 ###### 005 VIPs Amount
 
-*Task*: `hardware.members_amount.vips`
+_Task_: `hardware.members_amount.vips`
 
 This test checks the number of VIPs present for Keepalived.
 
 ###### 005 Balancers Amount
 
-*Task*: `hardware.members_amount.balancers`
+_Task_: `hardware.members_amount.balancers`
 
 This test checks the number of nodes present with the `balancer` role.
 
 ###### 005 Control-planes Amount
 
-*Task*: `hardware.members_amount.control-planes`
+_Task_: `hardware.members_amount.control-planes`
 
 This test checks the number of nodes present with the `control-plane` role.
 
 ###### 005 Workers Amount
 
-*Task*: `hardware.members_amount.workers`
+_Task_: `hardware.members_amount.workers`
 
 This test checks the number of nodes present with the `worker` role.
 
 ###### 005 Total Nodes Amount
 
-*Task*: `hardware.members_amount.total`
+_Task_: `hardware.members_amount.total`
 
 This test checks the number of all the nodes present.
 
@@ -262,19 +262,19 @@ Tests of this type check the availability of the required number of processors.
 
 ###### 006 VCPUs Amount - Balancers
 
-*Task*: `hardware.cpu.balancers`
+_Task_: `hardware.cpu.balancers`
 
 This test checks the number of processors on the nodes with the `balancer` role.
 
 ###### 006 VCPUs Amount - Control-planes
 
-*Task*: `hardware.cpu.control-planes`
+_Task_: `hardware.cpu.control-planes`
 
 This test checks the number of processors on the nodes with the `control-plane` role.
 
 ###### 006 VCPUs Amount - Workers
 
-*Task*: `hardware.cpu.workers`
+_Task_: `hardware.cpu.workers`
 
 This test checks the number of processors on the nodes with the `worker` role.
 
@@ -284,32 +284,31 @@ Tests of this type check the availability of the required number of RAM.
 
 ###### 007 RAM Amount - Balancers
 
-*Task*: `hardware.ram.balancers`
+_Task_: `hardware.ram.balancers`
 
 This test checks the amount of RAM on nodes with the `balancer` role.
 
 ###### 007 RAM Amount - Control-planes
 
-*Task*: `hardware.ram.control-planes`
+_Task_: `hardware.ram.control-planes`
 
 This test checks the amount of RAM on nodes with the `control-plane` role.
 
 ###### 007 RAM Amount - Workers
 
-*Task*: `hardware.ram.workers`
+_Task_: `hardware.ram.workers`
 
 This test checks the amount of RAM on nodes with the `worker` role.
 
-
 ##### 008 Distributive
 
-*Task*: `system.distributive`
+_Task_: `system.distributive`
 
 This test checks the family and release version of the operating system on the hosts.
 
 ##### 018 FS mount options
 
-*Task*: `system.fs_mount_options`
+_Task_: `system.fs_mount_options`
 
 This test checks the presence of filesystem mount option that affects contatiner functionality
 
@@ -319,60 +318,59 @@ Tests of this type perform the different network checks.
 
 ##### 009 PodSubnet
 
-*Task*: `network.pod_subnet_connectivity`
+_Task_: `network.pod_subnet_connectivity`
 
 This test checks the connectivity between nodes inside a pod's subnetwork.
 
 ##### 010 ServiceSubnet
 
-*Task*: `network.service_subnet_connectivity`
+_Task_: `network.service_subnet_connectivity`
 
 This test checks the connectivity between nodes inside the service's subnetwork.
 
 ##### 011 TCP & UDP Ports
 
-*Task*: `network.ports_connectivity`
+_Task_: `network.ports_connectivity`
 
 This test checks the connectivity between nodes for the predefined set of ports inside the nodes' internal subnetwork.
 
 ##### 016 VRRP IPs
 
-*Task*: `network.vips_connectivity`
+_Task_: `network.vips_connectivity`
 
 This test checks the connectivity between nodes and the VRRP IPs when they are assigned to the balancer nodes.
 
-##### 017 IP in IP Encapsulation 
+##### 017 IP in IP Encapsulation
 
-*Task*: `network.ipip_connectivity`
+_Task_: `network.ipip_connectivity`
 
 This test checks the connectivity between nodes by IP in IP encapsulation.
 
 ##### 012 Thirdparties Availability
 
-*Task*: `software.thirdparties.availability`
+_Task_: `software.thirdparties.availability`
 
 This test checks if thirdparties are available from sources on needed nodes.
 
 ##### 013 Package Repositories
 
-*Task*: `software.packages.repositories`
+_Task_: `software.packages.repositories`
 
 This test checks if defined package repositories are available from nodes.
 
 ##### 014 Package Availability
 
-*Task*: `software.packages.availability`
+_Task_: `software.packages.availability`
 
 This test checks if needed package are available from nodes.
 
 ###### 015 Kernel version
 
-*Task*: `software.kernel.version`
+_Task_: `software.kernel.version`
 
 This test checks the Linux kernel version for an `unstable kernel version`, if it is equal to a unstable one, it issues a warning
 
 `Unstable kernel version` - is a kernel with detected serious issue that affects any part of cluster, therefore it's unsupported
-
 
 #### PAAS Procedure
 
@@ -380,78 +378,78 @@ The PAAS procedure verifies the platform solution. For example, it checks the he
 
 The task tree is as follows:
 
-* services
-  * security
-    * selinux
-      * status
-      * config
-    * apparmor
-      * status
-      * config
-    * firewalld
-      * status
-  * system
-    * time
-    * swap
-      * status
-    * modprobe
-      * rules
-  * haproxy
-    * status
-  * keepalived
-    * status
-  * container_runtime
-    * status
-    * configuration
-  * kubelet
-    * status
-    * pid_max
-    * version
-    * configuration
-  kube-proxy:
-    * configuration
-  * packages
-    * system
-      * recommended_versions
-      * cri_version
-      * haproxy_version
-      * keepalived_version
-      * audit_version
-      * mandatory_versions
-    * generic
-      * version
-* thirdparties
-  * hashes
-* kubernetes
-  * pods
-  * plugins
-    * dashboard
-  * nodes
-    * existence
-    * roles
-    * condition
-      * network
-      * memory
-      * disk
-      * pid
-      * ready
-  * audit
-    * policy
-  * admission
-  * version
-* etcd
-  * health_status
-* control_plane
-  * configuration_status
-  * health_status
-* default_services
-  * configuration_status
-  * health_status
-* calico
-  * config_check
-  * apiserver
-    * health_status
-* geo_check
+- services
+  - security
+    - selinux
+      - status
+      - config
+    - apparmor
+      - status
+      - config
+    - firewalld
+      - status
+  - system
+    - time
+    - swap
+      - status
+    - modprobe
+      - rules
+  - haproxy
+    - status
+  - keepalived
+    - status
+  - container_runtime
+    - status
+    - configuration
+  - kubelet
+    - status
+    - pid_max
+    - version
+    - configuration
+      kube-proxy:
+    - configuration
+  - packages
+    - system
+      - recommended_versions
+      - cri_version
+      - haproxy_version
+      - keepalived_version
+      - audit_version
+      - mandatory_versions
+    - generic
+      - version
+- thirdparties
+  - hashes
+- kubernetes
+  - pods
+  - plugins
+    - dashboard
+  - nodes
+    - existence
+    - roles
+    - condition
+      - network
+      - memory
+      - disk
+      - pid
+      - ready
+  - audit
+    - policy
+  - admission
+  - version
+- etcd
+  - health_status
+- control_plane
+  - configuration_status
+  - health_status
+- default_services
+  - configuration_status
+  - health_status
+- calico
+  - config_check
+  - apiserver
+    - health_status
+- geo_check
 
 ##### 201 Service Status
 
@@ -459,128 +457,128 @@ Tests of this type verify the correctness of service statuses.
 
 ###### 201 Haproxy Status
 
-*Task*: `services.haproxy.status`
+_Task_: `services.haproxy.status`
 
 This test checks the status of the Haproxy service on all hosts in the cluster where this service is expected.
 
 ###### 201 Keepalived Status
 
-*Task*: `services.keepalived.status`
+_Task_: `services.keepalived.status`
 
 This test checks the status of the Keepalived service on all hosts in the cluster where this service is expected.
 
 ###### 201 Container Runtime Status
 
-*Task*: `services.container_runtime.status`
+_Task_: `services.container_runtime.status`
 
 This test checks the status of the Container Runtime (containerd) service on all hosts in the cluster where this service is expected.
 
 ###### 201 Kubelet Status
 
-*Task*: `services.kubelet.status`
+_Task_: `services.kubelet.status`
 
 This test checks the status of the Kubelet service on all hosts in the cluster where this service is expected.
 
 ##### 202 Nodes pid_max
 
-*Task*: `services.kubelet.pid_max`
+_Task_: `services.kubelet.pid_max`
 
 This test checks that kubelet `maxPods` and `podPidsLimit` are correctly aligned with kernel `pid_max`.
 
 ##### 203 Kubelet Version
 
-*Task*: `services.kubelet.version`
+_Task_: `services.kubelet.version`
 
 This test checks the Kubelet version on all hosts in a cluster.
 
 ##### 233 Kubelet Configuration
 
-*Task*: `services.kubelet.configuration`
+_Task_: `services.kubelet.configuration`
 
 This test checks the consistency of the /var/lib/kubelet/config.yaml configuration
 with `kubelet-config` ConfigMap and with the inventory.
 
 ##### 234 kube-proxy Configuration
 
-*Task*: `services.kube-proxy.configuration`
+_Task_: `services.kube-proxy.configuration`
 
 This test checks the consistency of the `kube-proxy` ConfigMap with the inventory.
 
 ##### 204 Container Runtime Configuration Check
 
-*Task*: `services.container_runtime.configuration`
+_Task_: `services.container_runtime.configuration`
 
 This test checks that the configuration of the container runtime is actual
 and matches the effectively resolved configuration from the inventory.
 
 ##### 205 System Packages Version
 
-Tests of this type check that the system packages are installed, have equal versions and those versions are 
+Tests of this type check that the system packages are installed, have equal versions and those versions are
 recommended and correspond with cluster.yaml.
 
 ###### 205 CRI Versions
 
-*Task*: `services.packages.system.cri_version`
+_Task_: `services.packages.system.cri_version`
 
-This test checks that the configured CRI package is installed on all nodes, has equal version and this version is 
+This test checks that the configured CRI package is installed on all nodes, has equal version and this version is
 recommended and corresponds with cluster.yaml.
 
 ###### 205 HAproxy Version
 
-*Task*: `services.packages.system.haproxy_version`
+_Task_: `services.packages.system.haproxy_version`
 
-This test checks that the configured HAproxy package is installed on all nodes, has equal version and this version is 
+This test checks that the configured HAproxy package is installed on all nodes, has equal version and this version is
 recommended and corresponds with cluster.yaml.
 
 ###### 205 Keepalived Version
 
-*Task*: `services.packages.system.keepalived_version`
+_Task_: `services.packages.system.keepalived_version`
 
-This test checks that the configured Keepalived package is installed on all nodes, has equal version and this version is 
+This test checks that the configured Keepalived package is installed on all nodes, has equal version and this version is
 recommended and corresponds with cluster.yaml.
 
 ###### 205 Audit Version
 
-*Task*: `services.packages.system.audit_version`
+_Task_: `services.packages.system.audit_version`
 
-This test checks that the configured Audit package is installed on all nodes, has equal version and this version is 
+This test checks that the configured Audit package is installed on all nodes, has equal version and this version is
 recommended and corresponds with cluster.yaml.
 
 ###### 205 Mandatory Package Versions
 
-*Task*: `services.packages.system.mandatory_versions`
+_Task_: `services.packages.system.mandatory_versions`
 
-This test checks that the configured mandatory packages are installed on all nodes, has equal version and this version 
+This test checks that the configured mandatory packages are installed on all nodes, has equal version and this version
 corresponds with cluster.yaml.
 
 ##### 206 Generic Packages Version
 
-*Task*: `services.packages.generic.version`
+_Task_: `services.packages.generic.version`
 
-This test checks that the configured generic packages are installed on all nodes, has equal version and this version 
+This test checks that the configured generic packages are installed on all nodes, has equal version and this version
 corresponds with cluster.yaml.
 
 ##### 207 Pods Condition
 
-*Task*: `kubernetes.pods`
+_Task_: `kubernetes.pods`
 
 This test checks that system pods are in good condition.
 
 ##### 208 Dashboard Availability
 
-*Task*: `kubernetes.plugins.dashboard`
+_Task_: `kubernetes.plugins.dashboard`
 
 This test checks that the dashboard is available by its URL.
 
 ##### 209 Nodes Existence
 
-*Task*: `kubernetes.nodes.existence`
+_Task_: `kubernetes.nodes.existence`
 
 This test checks for the presence of nodes in the Kubernetes cluster.
 
 ##### 210 Nodes Roles
 
-*Task*: `kubernetes.nodes.roles`
+_Task_: `kubernetes.nodes.roles`
 
 This test checks the nodes' roles in the Kubernetes cluster.
 
@@ -590,110 +588,110 @@ Tests of this type check the condition of the nodes that the Kubernetes reports.
 
 ###### 211 Nodes Condition - NetworkUnavailable
 
-*Task*: `kubernetes.nodes.condition.network`
+_Task_: `kubernetes.nodes.condition.network`
 
 This test checks the condition `NetworkUnavailable` of the Kubernetes nodes of the cluster.
 
 ###### 211 Nodes Condition - MemoryPressure
 
-*Task*: `kubernetes.nodes.condition.memory`
+_Task_: `kubernetes.nodes.condition.memory`
 
 This test checks the condition `MemoryPressure` of the Kubernetes nodes of the cluster.
 
 ###### 211 Nodes Condition - DiskPressure
 
-*Task*: `kubernetes.nodes.condition.disk`
+_Task_: `kubernetes.nodes.condition.disk`
 
 This test checks the condition `DiskPressure` of the Kubernetes nodes of the cluster.
 
 ###### 211 Nodes Condition - PIDPressure
 
-*Task*: `kubernetes.nodes.condition.pid`
+_Task_: `kubernetes.nodes.condition.pid`
 
 This test checks the condition `PIDPressure` of the Kubernetes nodes of the cluster.
 
 ###### 211 Nodes Condition - Ready
 
-*Task*: `kubernetes.nodes.condition.ready`
+_Task_: `kubernetes.nodes.condition.ready`
 
 This test checks the condition `Ready` of the Kubernetes nodes of the cluster.
 
 ##### 212 Thirdparties Hashes
 
-*Task*: `thirdparties.hashes`
+_Task_: `thirdparties.hashes`
 
 This test checks that configured thirdparties hashes are equal to actual files hashes on nodes.
 
 ##### 213 Selinux Security Policy
 
-*Task*: `services.security.selinux.status`
+_Task_: `services.security.selinux.status`
 
 The test checks the status of Selinux. It must be `enforcing`. It may be `permissive`, but must be explicitly specified
 in the inventory. Otherwise, the test will fail. This test is applicable only for systems of the RHEL family.
 
 ##### 214 Selinux Configuration
 
-*Task*: `services.security.selinux.config`
+_Task_: `services.security.selinux.config`
 
 The test compares the configuration of Selinux on the nodes with the configuration specified in the inventory or with the
 one by default. If the configuration does not match, the test will fail.
 
 ##### 215 Firewalld Status
 
-*Task*: `services.security.firewalld.status`
+_Task_: `services.security.firewalld.status`
 
 The test verifies that the FirewallD is disabled on cluster nodes, otherwise the test will fail.
 
 ##### 216 Swap State
 
-*Task*: `services.system.swap.status`
+_Task_: `services.system.swap.status`
 
 The test verifies that swap is disabled on all nodes in the cluster, otherwise the test will fail.
 
 ##### 217 Modprobe Rules
 
-*Task*: `services.system.modprobe.rules`
+_Task_: `services.system.modprobe.rules`
 
 The test compares the modprobe rules on the nodes with the rules specified in the inventory or with default rules. If
 rules does not match, the test will fail.
 
 ##### 218 Time Difference
 
-*Task*: `services.system.time`
+_Task_: `services.system.time`
 
-The test verifies that the time between all nodes does not differ by more than the maximum limit value. Otherwise, the 
+The test verifies that the time between all nodes does not differ by more than the maximum limit value. Otherwise, the
 cluster may not work properly and the test will be highlighted with a warning.
 
 Maximum limit value: 15000ms
 
 **Note:** this test can give a false-positive result if there are a lot of nodes in the cluster, there is too much delay
-between the deployer node and all the others, or any other conditions of the environment. It is also recommended to be 
-sure to perform latency tests: [002 Latency - Single Thread](#002-latency---single-thread) and 
+between the deployer node and all the others, or any other conditions of the environment. It is also recommended to be
+sure to perform latency tests: [002 Latency - Single Thread](#002-latency---single-thread) and
 [003 Latency - Multi Thread](#003-latency---multi-thread).
 
 ##### 219 Health Status ETCD
 
-*Task*: `etcd.health_status`
+_Task_: `etcd.health_status`
 
 This test verifies ETCD health.
 
 ##### 220 Control Plane Configuration Status
 
-*Task*: `control_plane.configuration_status`
+_Task_: `control_plane.configuration_status`
 
 This test verifies the consistency of the configuration of static pods of Control Plain
 for `kube-apiserver`, `kube-controller-manager`, `kube-scheduler`, and `etcd`.
 
 ##### 221 Control Plane Health Status
 
-*Task*: `control_plane.health_status`
+_Task_: `control_plane.health_status`
 
 This test verifies the health of static pods `kube-apiserver`, `kube-controller-manager`,
 `kube-scheduler`, and `etcd`.
 
 ##### 222 Default Services Configuration Status
 
-*Task*: `default_services.configuration_status`
+_Task_: `default_services.configuration_status`
 
 In this test, the versions of the images of the default services
 `kube-proxy`, `coredns`,
@@ -704,7 +702,7 @@ and the `coredns` configmap is also checked.
 
 ##### 223 Default Services Health Status
 
-*Task*: `default_services.health_status`
+_Task_: `default_services.health_status`
 
 This test verifies the health of
 `kube-proxy`, `coredns`,
@@ -714,29 +712,30 @@ This test verifies the health of
 
 ##### 224 Calico Configuration Check
 
-*Task*: `calico.config_check`
+_Task_: `calico.config_check`
 
 This test checks the configuration of the `calico-node` envs, Calico's ConfigMap in case of `ipam`, and also performed `calicoctl ipam check`.
 
 ###### 230 Calico API Server Health Status
 
-*Task*: `calico.apiserver.health_status`
+_Task_: `calico.apiserver.health_status`
 
 This test verifies the Calico API server health.
 
 ##### 225 Pod Security Admission Status
 
-*Task*: `kubernetes.admission`
+_Task_: `kubernetes.admission`
 
 The test checks status of Pod Security Admissions, default PSS (Pod Security Standards) profile and match consistence between 'cluster.yaml' and current Kubernetes configuration. Also it check consistency between 'kube-apiserver.yaml' and 'kubeadm-config'.
 
 ##### 226 Geo Connectivity Status
 
-*Task*: `geo_check`
+_Task_: `geo_check`
 
 The task checks the status of DNS resolving, pod-to-service, and pod-to-pod connectivity between clusters in geographically
 distributed schemas. This task works only if procedure config file is provided with information about `paas-geo-monitor`,
 at least service name and namespace. For example:
+
 ```yaml
 geo-monitor:
   namespace: site-manager
@@ -747,26 +746,26 @@ For more information about `paas-geo-monitor` service, refer to DRNavigator repo
 
 ##### 227 AppArmor Status
 
-*Task*: `services.security.apparmor.status`
+_Task_: `services.security.apparmor.status`
 
 The test checks the status of AppArmor. It should be `enabled` by default.
 
 ##### 228 AppArmor Configuration
 
-*Task*: `services.security.apparmor.config`
+_Task_: `services.security.apparmor.config`
 
 The test checks the AppArmor configuration. It has several modes: `enforce`, `complain`, and `disable`. The profiles (resources) stick to one of the modes. The `cluster.yaml` may include only part of the profiles.
 
 ##### 229 Audit Policy Configuration
 
-*Task*: `kubernetes.audit.policy`
+_Task_: `kubernetes.audit.policy`
 
 This test checks that the configuration of Kubernetes audit policy is actual
 and matches the effectively resolved configuration from the inventory.
 
 ##### 231 Audit Daemon Rules
 
-*Task*: `system.audit.rules`
+_Task_: `system.audit.rules`
 
 This test compares the Audit rules on the nodes
 with the rules specified in the inventory or with the default rules.
@@ -774,7 +773,7 @@ If the configured rules are not presented, the test fails.
 
 ##### 232 Kernel Parameters Configuration
 
-*Task*: `system.sysctl.config`
+_Task_: `system.sysctl.config`
 
 This test compares the kernel parameters on the nodes
 with the parameters specified in the inventory or with the default parameters.
@@ -782,7 +781,7 @@ If the configured parameters are not presented, the test fails.
 
 ##### 235 Kubernetes version
 
-*Task*: `kubernetes.version`
+_Task_: `kubernetes.version`
 
 This test checks if used kubernetes version is deprecated in current kubemarine release.
 It means, that this version is going to be excluded from support in future kubemarine soon.
@@ -796,75 +795,75 @@ In addition to the resulting table in the log output, the same report is present
 
 The report allows you to visually see the final report. All content, including styles, is already included inside a single file. You can use the following supported command line arguments:
 
-|Argument|Default|Description|
-|---|---|---|
-|**--html-report**|`report.html`|The full absolute path to the file location where the report is saved.|
-|**--disable-html-report**| |If specified, the report generation is disabled.|
+| Argument                  | Default       | Description                                                            |
+| ------------------------- | ------------- | ---------------------------------------------------------------------- |
+| **--html-report**         | `report.html` | The full absolute path to the file location where the report is saved. |
+| **--disable-html-report** |               | If specified, the report generation is disabled.                       |
 
 Report file example (trimmed):
 
 ```html
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<title>PAAS Check Report</title>
-	</head>
-	<body>
-		<div id="date">2020-04-29 10:09:31.096773</div>
-		<div id="stats">
-			<div class="succeeded">12 succeeded</div>
-		</div>
-		<h1>PAAS Check Report</h1>
-		<table>
-			<thead>
-				<tr>
-					<td>Group</td>
-					<td>Status</td>
-					<td>ID</td>
-					<td>Test</td>
-					<td>Actual Result</td>
-					<td>Minimal</td>
-					<td>Recommended</td>
-				</tr>
-			</thead>
-			<tbody>
-				<tr class="ok">
-					<td>services</td>
-					<td>
-						<div>ok</div>
-					</td>
-					<td>201</td>
-					<td>Haproxy Status</td>
-					<td>active (running)</td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr class="ok">
-					<td>services</td>
-					<td>
-						<div>ok</div>
-					</td>
-					<td>201</td>
-					<td>Keepalived Status</td>
-					<td>active (running)</td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr class="ok">
-					<td>services</td>
-					<td>
-						<div>ok</div>
-					</td>
-					<td>201</td>
-					<td>Docker Status</td>
-					<td>active (running)</td>
-					<td></td>
-					<td></td>
-				</tr>
-			</tbody>
-		</table>
-	</body>
+  <head>
+    <meta charset="utf-8" />
+    <title>PAAS Check Report</title>
+  </head>
+  <body>
+    <div id="date">2020-04-29 10:09:31.096773</div>
+    <div id="stats">
+      <div class="succeeded">12 succeeded</div>
+    </div>
+    <h1>PAAS Check Report</h1>
+    <table>
+      <thead>
+        <tr>
+          <td>Group</td>
+          <td>Status</td>
+          <td>ID</td>
+          <td>Test</td>
+          <td>Actual Result</td>
+          <td>Minimal</td>
+          <td>Recommended</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="ok">
+          <td>services</td>
+          <td>
+            <div>ok</div>
+          </td>
+          <td>201</td>
+          <td>Haproxy Status</td>
+          <td>active (running)</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr class="ok">
+          <td>services</td>
+          <td>
+            <div>ok</div>
+          </td>
+          <td>201</td>
+          <td>Keepalived Status</td>
+          <td>active (running)</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr class="ok">
+          <td>services</td>
+          <td>
+            <div>ok</div>
+          </td>
+          <td>201</td>
+          <td>Docker Status</td>
+          <td>active (running)</td>
+          <td></td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>
 ```
 
@@ -872,11 +871,11 @@ Report file example (trimmed):
 
 This report allows a thirdparty software to parse the report result. This is convenient when working with Excel or automatic metrics collection systems. You can use the following supported command line arguments:
 
-|Argument|Default|Description|
-|---|---|---|
-|**--csv-report**|`report.csv`|The full absolute path to the file location where the report is saved.|
-|**--csv-report-delimiter**|`;`|The character used as a column separator.|
-|**--disable-csv-report**| |If specified, the report generation is disabled.|
+| Argument                   | Default      | Description                                                            |
+| -------------------------- | ------------ | ---------------------------------------------------------------------- |
+| **--csv-report**           | `report.csv` | The full absolute path to the file location where the report is saved. |
+| **--csv-report-delimiter** | `;`          | The character used as a column separator.                              |
+| **--disable-csv-report**   |              | If specified, the report generation is disabled.                       |
 
 Report file example:
 
