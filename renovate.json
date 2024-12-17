@@ -5,7 +5,8 @@
   ],
   "packageRules": [
     {
-      "matchPackagePatterns": ["^alpine$"],
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["alpine"],
       "allowedVersions": "< 3.20.0"
     }
   ]
