@@ -8,7 +8,9 @@
       "minItems": 1,
       "items": {
         "type": "object",
-        "allOf": [{"$ref": "../definitions/node.json#/definitions/AccessProperties"}],
+        "allOf": [
+          { "$ref": "../definitions/node.json#/definitions/AccessProperties" }
+        ],
         "properties": {
           "roles": {
             "$ref": "#/definitions/LegacyRoles",
@@ -21,7 +23,11 @@
     "node_defaults": {
       "type": "object",
       "description": "Section to hold the parameters to be applied by default to each record in the nodes section",
-      "allOf": [{"$ref": "../definitions/node_defaults.json#/definitions/CommonNodeAccessProperties"}]
+      "allOf": [
+        {
+          "$ref": "../definitions/node_defaults.json#/definitions/CommonNodeAccessProperties"
+        }
+      ]
     },
     "gateway_nodes": {
       "$ref": "../cluster.json#/definitions/GatewayNodes"

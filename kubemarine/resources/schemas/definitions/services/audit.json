@@ -11,8 +11,8 @@
       "type": "object",
       "description": "Policy for Kubernetes logging",
       "properties": {
-        "apiVersion": {"type": ["string"], "default": "audit.k8s.io/v1"},
-        "kind": {"enum": ["Policy"], "default": "Policy"},
+        "apiVersion": { "type": ["string"], "default": "audit.k8s.io/v1" },
+        "kind": { "enum": ["Policy"], "default": "Policy" },
         "omitStages": {
           "type": "array",
           "items": {
@@ -21,8 +21,8 @@
                 "type": "string",
                 "enum": ["RequestReceived"]
               },
-              {"type": "string"},
-              {"$ref": "../common/utils.json#/definitions/ListMergingSymbol"}
+              { "type": "string" },
+              { "$ref": "../common/utils.json#/definitions/ListMergingSymbol" }
             ]
           }
         },
@@ -30,8 +30,8 @@
           "type": "array",
           "items": {
             "oneOf": [
-              {"$ref": "#/definitions/PolicyRule"},
-              {"$ref": "../common/utils.json#/definitions/ListMergingSymbol"}
+              { "$ref": "#/definitions/PolicyRule" },
+              { "$ref": "../common/utils.json#/definitions/ListMergingSymbol" }
             ]
           }
         }
@@ -43,23 +43,27 @@
     "PolicyRule": {
       "type": "object",
       "properties": {
-        "level": {"type": "string"},
-        "verbs": {"$ref": "../common/utils.json#/definitions/ArrayOfStrings"},
+        "level": { "type": "string" },
+        "verbs": { "$ref": "../common/utils.json#/definitions/ArrayOfStrings" },
         "resources": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "group": {"type": "string"},
-              "resources": {"$ref": "../common/utils.json#/definitions/ArrayOfStrings"},
-              "resourceNames": {"$ref": "../common/utils.json#/definitions/ArrayOfStrings"}
+              "group": { "type": "string" },
+              "resources": {
+                "$ref": "../common/utils.json#/definitions/ArrayOfStrings"
+              },
+              "resourceNames": {
+                "$ref": "../common/utils.json#/definitions/ArrayOfStrings"
+              }
             }
           }
         }
       },
       "required": ["level"],
       "propertyNames": {
-        "not": {"enum": ["<<"]}
+        "not": { "enum": ["<<"] }
       }
     }
   }
