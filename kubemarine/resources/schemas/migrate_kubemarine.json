@@ -18,9 +18,15 @@
       },
       "additionalProperties": false
     },
-    "disable-eviction": {"$ref": "definitions/procedures.json#/definitions/DisableEviction"},
-    "grace_period": {"$ref": "definitions/procedures.json#/definitions/GracePeriod"},
-    "drain_timeout": {"$ref": "definitions/procedures.json#/definitions/DrainTimeout"}
+    "disable-eviction": {
+      "$ref": "definitions/procedures.json#/definitions/DisableEviction"
+    },
+    "grace_period": {
+      "$ref": "definitions/procedures.json#/definitions/GracePeriod"
+    },
+    "drain_timeout": {
+      "$ref": "definitions/procedures.json#/definitions/DrainTimeout"
+    }
   },
   "additionalProperties": false,
   "definitions": {
@@ -51,9 +57,15 @@
           "type": "object",
           "description": "Configure associations of package objects to be used during upgrade",
           "properties": {
-            "containerd": {"$ref": "definitions/services/packages/associations.json#/definitions/PackageNameOnlyAssociations"},
-            "haproxy": {"$ref": "definitions/services/packages/associations.json#/definitions/PackageNameOnlyAssociations"},
-            "keepalived": {"$ref": "definitions/services/packages/associations.json#/definitions/PackageNameOnlyAssociations"}
+            "containerd": {
+              "$ref": "definitions/services/packages/associations.json#/definitions/PackageNameOnlyAssociations"
+            },
+            "haproxy": {
+              "$ref": "definitions/services/packages/associations.json#/definitions/PackageNameOnlyAssociations"
+            },
+            "keepalived": {
+              "$ref": "definitions/services/packages/associations.json#/definitions/PackageNameOnlyAssociations"
+            }
           },
           "additionalProperties": false
         }
@@ -64,8 +76,12 @@
       "type": "object",
       "description": "Deliver files from third party sources and install them in the system",
       "properties": {
-        "/usr/bin/calicoctl": {"$ref": "definitions/services/thirdparties.json#/definitions/ThirdParty"},
-        "/usr/bin/crictl.tar.gz": {"$ref": "definitions/services/thirdparties.json#/definitions/ThirdParty"}
+        "/usr/bin/calicoctl": {
+          "$ref": "definitions/services/thirdparties.json#/definitions/ThirdParty"
+        },
+        "/usr/bin/crictl.tar.gz": {
+          "$ref": "definitions/services/thirdparties.json#/definitions/ThirdParty"
+        }
       },
       "additionalProperties": false
     }

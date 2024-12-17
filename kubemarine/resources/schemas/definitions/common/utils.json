@@ -46,8 +46,8 @@
       "type": "array",
       "items": {
         "oneOf": [
-          {"type": "object", "propertyNames": {"not": {"enum": ["<<"]}}},
-          {"$ref": "#/definitions/ListMergingSymbol"}
+          { "type": "object", "propertyNames": { "not": { "enum": ["<<"] } } },
+          { "$ref": "#/definitions/ListMergingSymbol" }
         ]
       }
     },
@@ -55,8 +55,8 @@
       "type": "array",
       "items": {
         "oneOf": [
-          {"type": "string"},
-          {"$ref": "../common/utils.json#/definitions/ListMergingSymbol"}
+          { "type": "string" },
+          { "$ref": "../common/utils.json#/definitions/ListMergingSymbol" }
         ]
       },
       "uniqueItems": true
@@ -69,7 +69,7 @@
     "ListMergingSymbol": {
       "type": "object",
       "properties": {
-        "<<": {"$ref": "#/definitions/ListMergingDefinition"}
+        "<<": { "$ref": "#/definitions/ListMergingDefinition" }
       },
       "required": ["<<"],
       "additionalProperties": false
