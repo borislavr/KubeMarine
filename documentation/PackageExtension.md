@@ -9,7 +9,7 @@ This section describes the ways in which to extend the standard functionality of
 ## Basic Overview
 
 All available code is formed in a single python package `kubemarine`. You can call and modify any modules, variables,
-classes and methods from this package in runtime. 
+classes and methods from this package in runtime.
 
 For example, create new Kubernetes cluster and execute whoami on all nodes with the following code:
 
@@ -76,7 +76,6 @@ class MySuperCluster(KubernetesCluster):
         self.GLOBALS_YAML_LOC = "/tmp/modified/custom_globals.yaml"
         self._load()
 ```
-
 
 ### Launcher Extension
 

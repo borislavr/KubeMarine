@@ -11,10 +11,12 @@
       "description": "Manually specify certain nodes that need to be upgraded. Each item can be either a node name referring to the cluster.yaml, or full node specification.",
       "items": {
         "oneOf": [
-          {"$ref": "definitions/common/node_ref.json#/definitions/Name"},
+          { "$ref": "definitions/common/node_ref.json#/definitions/Name" },
           {
             "type": "object",
-            "allOf": [{"$ref": "definitions/node.json#/definitions/Properties"}],
+            "allOf": [
+              { "$ref": "definitions/node.json#/definitions/Properties" }
+            ],
             "required": ["name"],
             "propertyNames": {
               "$ref": "definitions/node.json#/definitions/PropertyNames"
@@ -25,10 +27,18 @@
       "minItems": 1,
       "uniqueItems": true
     },
-    "disable-eviction": {"$ref": "definitions/procedures.json#/definitions/DisableEviction"},
-    "prepull_group_size": {"$ref": "definitions/procedures.json#/definitions/PrepullGroupSize"},
-    "grace_period": {"$ref": "definitions/procedures.json#/definitions/GracePeriod"},
-    "drain_timeout": {"$ref": "definitions/procedures.json#/definitions/DrainTimeout"}
+    "disable-eviction": {
+      "$ref": "definitions/procedures.json#/definitions/DisableEviction"
+    },
+    "prepull_group_size": {
+      "$ref": "definitions/procedures.json#/definitions/PrepullGroupSize"
+    },
+    "grace_period": {
+      "$ref": "definitions/procedures.json#/definitions/GracePeriod"
+    },
+    "drain_timeout": {
+      "$ref": "definitions/procedures.json#/definitions/DrainTimeout"
+    }
   },
   "required": ["upgrade_plan"],
   "additionalProperties": {
@@ -41,21 +51,29 @@
       "packages": {
         "type": "object",
         "description": "Section for packages and their management during upgrade",
-        "allOf": [{"$ref": "definitions/services/packages.json#/definitions/CustomPackages"}],
+        "allOf": [
+          {
+            "$ref": "definitions/services/packages.json#/definitions/CustomPackages"
+          }
+        ],
         "properties": {
           "associations": {
             "type": "object",
             "description": "Configure associations of package objects to be used during upgrade",
             "properties": {
-              "containerd": {"$ref": "definitions/services/packages/associations.json#/definitions/PackageNameOnlyAssociations"}
+              "containerd": {
+                "$ref": "definitions/services/packages/associations.json#/definitions/PackageNameOnlyAssociations"
+              }
             },
             "additionalProperties": false
           }
         },
         "propertyNames": {
           "anyOf": [
-            {"$ref": "definitions/services/packages.json#/definitions/CustomPackagesPropertyNames"},
-            {"enum": ["associations"]}
+            {
+              "$ref": "definitions/services/packages.json#/definitions/CustomPackagesPropertyNames"
+            },
+            { "enum": ["associations"] }
           ]
         }
       },
@@ -83,7 +101,7 @@
         "plugins.\"io.containerd.grpc.v1.cri\"": {
           "type": "object",
           "properties": {
-            "sandbox_image": {"type": "string"}
+            "sandbox_image": { "type": "string" }
           },
           "additionalProperties": false
         }
