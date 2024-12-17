@@ -83,8 +83,8 @@
     },
     "GenericValue": {
       "oneOf": [
-        {"$ref": "#/definitions/SimpleValue"},
-        {"$ref": "#/definitions/FilteredValue"}
+        { "$ref": "#/definitions/SimpleValue" },
+        { "$ref": "#/definitions/FilteredValue" }
       ],
       "description": "The value can be an integer value, template string to be rendered as an integer value, or dictionary with the value and additional parameters."
     }

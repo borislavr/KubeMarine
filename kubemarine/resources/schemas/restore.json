@@ -56,12 +56,12 @@
           "type": "object",
           "description": "Specify sources of the 3rd-parties to restore in case the corresponding sources in cluster.yaml are outdated",
           "properties": {
-            "/usr/bin/etcdctl": {"$ref": "#/definitions/ThirdParty"},
-            "/usr/bin/kubeadm": {"$ref": "#/definitions/ThirdParty"},
-            "/usr/bin/kubelet": {"$ref": "#/definitions/ThirdParty"},
-            "/usr/bin/kubectl": {"$ref": "#/definitions/ThirdParty"},
-            "/usr/bin/calicoctl": {"$ref": "#/definitions/ThirdParty"},
-            "/usr/bin/crictl.tar.gz": {"$ref": "#/definitions/ThirdParty"}
+            "/usr/bin/etcdctl": { "$ref": "#/definitions/ThirdParty" },
+            "/usr/bin/kubeadm": { "$ref": "#/definitions/ThirdParty" },
+            "/usr/bin/kubelet": { "$ref": "#/definitions/ThirdParty" },
+            "/usr/bin/kubectl": { "$ref": "#/definitions/ThirdParty" },
+            "/usr/bin/calicoctl": { "$ref": "#/definitions/ThirdParty" },
+            "/usr/bin/crictl.tar.gz": { "$ref": "#/definitions/ThirdParty" }
           },
           "additionalProperties": {
             "$ref": "#/definitions/ThirdParty"
@@ -77,7 +77,11 @@
     "ThirdParty": {
       "type": "object",
       "description": "The absolute destination path of the 3rd-party on the host system of the cluster",
-      "allOf": [{"$ref": "definitions/services/thirdparties.json#/definitions/MinimalThirdPartyProperties"}],
+      "allOf": [
+        {
+          "$ref": "definitions/services/thirdparties.json#/definitions/MinimalThirdPartyProperties"
+        }
+      ],
       "required": ["source"],
       "propertyNames": {
         "$ref": "definitions/services/thirdparties.json#/definitions/MinimalThirdPartyPropertyNames"
