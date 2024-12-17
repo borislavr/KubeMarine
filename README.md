@@ -8,6 +8,7 @@
 Kubemarine is an open source, lightweight and powerful management tool built for end-to-end Kubernetes cluster deployment and maintenance. It is applicable for many purposes like simple and quick onboarding Kubernetes on local and production environments in different HA schemes depending on your aims, budget, and capabilities. Together with simplicity, Kubemarine can be a very flexible and customizable tool covering specific configurability cases on both deployment and maintenance stages. This library provides powerful CLI commands, as well as can be customized using a Python extension API.
 
 ## Highlights
+
 - Easy to use
 - Many procedures supported following the [generic maintenance approach](documentation/Maintenance.md#basics):
   - [install](documentation/Installation.md#)
@@ -37,60 +38,72 @@ Kubemarine is an open source, lightweight and powerful management tool built for
 
 There are following key locations in the repository
 
-| Paths | Description |
-| ----- | ----------- |
-| `.github/workflows/`, `ci/` | Contain GitHub Actions configuration which runs unit/integration tests, builds/publishes artifacts, etc |
-| `documentation/`, `examples/`, `README.md` | Contain documentation and examples |
-| `kubemarine/` | Contains source code for KubeMarine python package |
-| `test/` | Contains tests |
-| `bin/`, `scripts/ci/` | Contains auxiliary scripts used during KubeMarine build |
-| `scripts/thirdparties/` | Contains auxiliary script used to update KubeMarine thirdparties versions | 
-| `Dockerfile`, `kubemarine.spec`, `MANIFEST.in`, `pyproject.toml`, `requirements-pyinstaller.txt`, `setup.py` | Different files used to build KubeMarine artifacts (image, binaries, package) |
+| Paths                                                                                                        | Description                                                                                             |
+| ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `.github/workflows/`, `ci/`                                                                                  | Contain GitHub Actions configuration which runs unit/integration tests, builds/publishes artifacts, etc |
+| `documentation/`, `examples/`, `README.md`                                                                   | Contain documentation and examples                                                                      |
+| `kubemarine/`                                                                                                | Contains source code for KubeMarine python package                                                      |
+| `test/`                                                                                                      | Contains tests                                                                                          |
+| `bin/`, `scripts/ci/`                                                                                        | Contains auxiliary scripts used during KubeMarine build                                                 |
+| `scripts/thirdparties/`                                                                                      | Contains auxiliary script used to update KubeMarine thirdparties versions                               |
+| `Dockerfile`, `kubemarine.spec`, `MANIFEST.in`, `pyproject.toml`, `requirements-pyinstaller.txt`, `setup.py` | Different files used to build KubeMarine artifacts (image, binaries, package)                           |
 
 ## Kubemarine Binary Installation
-Proceed the following steps to install Kubemarine  on your environment:
+
+Proceed the following steps to install Kubemarine on your environment:
+
 1. Download the binary file for your system from the latest [release](https://github.com/Netcracker/KubeMarine/releases)
-2. Move binary kubemarine to a separate folder 
+2. Move binary kubemarine to a separate folder
 3. Now you can proceed to run Kubemarine! Try the following:
    ```bash
    kubemarine help
    ```
 
-
 ## Kubemarine Package Installation
+
 To install Kubemarine as package on your environment:
+
 1. Install the latest [python](https://www.python.org/downloads/).
 1. Upgrade pip.
 
    Linux / MacOS:
+
    ```bash
    python3 -m pip install --upgrade pip
    ```
+
    Windows:
+
    ```bash
    python -m pip install --upgrade pip
    ```
+
 1. Ensure your environment meets the [Deployment Node Prerequisites](documentation/Installation.md#prerequisites-for-deployment-node).
 1. Create and activate a [virtual environment](https://realpython.com/python-virtual-environments-a-primer/) if necessary.
 1. Install Kubemarine package.
 
    Linux / MacOS:
+
    ```bash
    python3 -m pip install kubemarine
    ```
+
    Windows:
+
    ```bash
    python -m pip install kubemarine
    ```
+
 1. Now you can proceed to run Kubemarine! Try the following:
    ```bash
    kubemarine help
    ```
 
-
 ## Kubemarine Installation from Sources
+
 Installation of Kubemarine from sources is mostly similar to [Kubemarine Package Installation](#kubemarine-package-installation).
 The exception is instead of installing the package from [PyPI](https://pypi.org/project/kubemarine/), do the following:
+
 1. [Download the latest release](https://github.com/netcracker/kubemarine/releases) or clone the repository:
    ```bash
    git clone https://github.com/netcracker/kubemarine.git
@@ -106,32 +119,37 @@ The exception is instead of installing the package from [PyPI](https://pypi.org/
 1. Install Kubemarine package from sources.
 
    Linux / MacOS:
+
    ```bash
    python3 -m pip install -e .[ansible]
    ```
+
    Windows:
+
    ```bash
    python -m pip install -e .
    ```
+
 1. Now you can proceed to run Kubemarine. Try the following:
-    ```bash
-    kubemarine help
-    ```
+   ```bash
+   kubemarine help
+   ```
 
 **Note**: Building from [Dockerfile](Dockerfile) is also available.
 
-
 **Note:** Kubemarine debugging available via `kubemarine/__main__.py`.
 
-
 ## Running Cluster Installation
+
 To install a Kubernetes cluster using Kubemarine:
+
 1. Prepare your VMs or bare-metal machines according to [Recommended Hardware Requirements](documentation/Installation.md#recommended-hardware-requirements) and the selected [Deployment Scheme](documentation/Installation.md#deployment-schemes). Make sure the nodes meet [Cluster Nodes Prerequisites](documentation/Installation.md#prerequisites-for-cluster-nodes).
 1. Create the `cluster.yaml` inventory file, and describe your environment. Make sure that all configurations are done. For more information, see [inventory configs available](documentation/Installation.md#configuration) and [examples](examples/cluster.yaml). No need to enter all the parameters that are available, it is enough to specify the minimal identification data about the nodes where you want to install the cluster, for example:
+
    ```yaml
    node_defaults:
      keyfile: "/home/username/.ssh/id_rsa"
-     password: '{{ env.PASS }}'     #Either keyfile or password can be used.
+     password: "{{ env.PASS }}" #Either keyfile or password can be used.
      username: "centos"
 
    vrrp_ips:
@@ -150,6 +168,7 @@ To install a Kubernetes cluster using Kubemarine:
 
    cluster_name: "k8s.example.com"
    ```
+
 1. Move `cluster.yaml` to the directory where Kubemarine is installed.
 1. Verify the infrastructure:
    ```bash
@@ -167,17 +186,22 @@ To install a Kubernetes cluster using Kubemarine:
 For more information, refer to the other [Kubemarine guides](#documentation).
 
 ## Kubemarine Docker Installation
-To start, download the Kubmarine image ```docker pull ghcr.io/netcracker/kubemarine:main```
+
+To start, download the Kubmarine image `docker pull ghcr.io/netcracker/kubemarine:main`
 
 Run Kubemarine from the container, for example:
-   ```
-   docker run -it --mount type=bind,source=/root/cluster.yaml,target=/opt/kubemarine/cluster.yaml --mount type=bind,source=/root/rsa_key,target=/opt/kubemarine/rsa_key kubemarine install -c /opt/kubemarine/cluster.yaml
-   ```
-   *Note*: Do not forget to pass the inventory file and connection key inside the container.
-   For more execution details, refer to ["Installation of Kubernetes using CLI" guide on Github](https://github.com/Netcracker/kubemarine/blob/main/documentation/Installation.md#installation-of-kubernetes-using-cli).
+
+```
+docker run -it --mount type=bind,source=/root/cluster.yaml,target=/opt/kubemarine/cluster.yaml --mount type=bind,source=/root/rsa_key,target=/opt/kubemarine/rsa_key kubemarine install -c /opt/kubemarine/cluster.yaml
+```
+
+_Note_: Do not forget to pass the inventory file and connection key inside the container.
+For more execution details, refer to ["Installation of Kubernetes using CLI" guide on Github](https://github.com/Netcracker/kubemarine/blob/main/documentation/Installation.md#installation-of-kubernetes-using-cli).
 
 ## Documentation
+
 The following documents and tutorials are available:
+
 - [Installation](documentation/Installation.md)
 - [Maintenance](documentation/Maintenance.md)
 - [Troubleshooting](documentation/Troubleshooting.md)
@@ -185,21 +209,27 @@ The following documents and tutorials are available:
 - [Logging](documentation/Logging.md)
 
 Also, check out the following inventory examples:
+
 - [cluster.yaml](examples/cluster.yaml)
 - [procedure.yaml](examples/procedure.yaml)
 
 For maintainers and developers there is useful [internal documentation](/documentation/internal/), for example:
-* [How to write patches](/documentation/internal/Patches.md)
-* [How to make new release](/documentation/internal/Release.md)
+
+- [How to write patches](/documentation/internal/Patches.md)
+- [How to make new release](/documentation/internal/Release.md)
 
 ## Issues, Questions
+
 If you have any problems while working with Kubemarine, feel free to open a [new issue](https://github.com/netcracker/kubemarine/issues) or even
 [PR](https://github.com/netcracker/kubemarine/pulls) with related changes.
-Please follow the [Contribution Guide](CONTRIBUTING.md ) and the process outlined in the Stack Overflow [MCVE](https://stackoverflow.com/help/mcve) document.
+Please follow the [Contribution Guide](CONTRIBUTING.md) and the process outlined in the Stack Overflow [MCVE](https://stackoverflow.com/help/mcve) document.
 
 In case of security concerns, please follow the [Security Reporting Process](SECURITY.md)
+
 ## Changelog
+
 Detailed changes for each release are documented in the [release notes](https://github.com/netcracker/kubemarine/releases).
 
 ## License
+
 [Apache License 2.0](LICENSE)

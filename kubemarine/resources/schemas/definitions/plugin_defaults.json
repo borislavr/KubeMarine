@@ -6,7 +6,9 @@
     "installation": {
       "type": "object",
       "description": "The section describes the plugins installation process",
-      "allOf": [{"$ref": "plugins/installation.json#/definitions/DefaultProperties"}],
+      "allOf": [
+        { "$ref": "plugins/installation.json#/definitions/DefaultProperties" }
+      ],
       "propertyNames": {
         "$ref": "plugins/installation.json#/definitions/DefaultPropertyNames"
       }

@@ -2,15 +2,13 @@
   "$schema": "http://json-schema.org/draft-07/schema",
   "type": "object",
   "properties": {
-    "debian": {"$ref": "#/definitions/OSFamilyModules"},
-    "rhel": {"$ref": "#/definitions/OSFamilyModules"},
-    "rhel8": {"$ref": "#/definitions/OSFamilyModules"},
-    "rhel9": {"$ref": "#/definitions/OSFamilyModules"}
+    "debian": { "$ref": "#/definitions/OSFamilyModules" },
+    "rhel": { "$ref": "#/definitions/OSFamilyModules" },
+    "rhel8": { "$ref": "#/definitions/OSFamilyModules" },
+    "rhel9": { "$ref": "#/definitions/OSFamilyModules" }
   },
   "propertyNames": {
-    "anyOf": [
-      {"enum": ["debian", "rhel", "rhel8", "rhel9"]}
-    ]
+    "anyOf": [{ "enum": ["debian", "rhel", "rhel8", "rhel9"] }]
   },
   "definitions": {
     "OSFamilyModules": {
@@ -20,13 +18,22 @@
         "anyOf": [
           {
             "type": "string",
-            "enum": ["br_netfilter", "ip6table_filter", "nf_conntrack_ipv6", "nf_nat_masquerade_ipv6", "nf_reject_ipv6", "nf_defrag_ipv6", "nf_nat", "nf_conntrack"]
+            "enum": [
+              "br_netfilter",
+              "ip6table_filter",
+              "nf_conntrack_ipv6",
+              "nf_nat_masquerade_ipv6",
+              "nf_reject_ipv6",
+              "nf_defrag_ipv6",
+              "nf_nat",
+              "nf_conntrack"
+            ]
           },
-          {"type": "string"},
+          { "type": "string" },
           {
             "oneOf": [
-              {"$ref": "#/definitions/FilteredModule"},
-              {"$ref": "../common/utils.json#/definitions/ListMergingSymbol"}
+              { "$ref": "#/definitions/FilteredModule" },
+              { "$ref": "../common/utils.json#/definitions/ListMergingSymbol" }
             ]
           }
         ]

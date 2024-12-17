@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema",
   "type": "object",
   "description": "Change the default settings for the by-default installed 'calico' plugin",
-  "allOf": [{"$ref": "generic_plugin.json#/definitions/Properties"}],
+  "allOf": [{ "$ref": "generic_plugin.json#/definitions/Properties" }],
   "properties": {
     "install": {
       "type": ["string", "boolean"],
@@ -51,8 +51,8 @@
       "items": {
         "type": "object",
         "properties": {
-          "ip": {"type": "string"},
-          "as": {"type": ["string", "integer"]}
+          "ip": { "type": "string" },
+          "as": { "type": ["string", "integer"] }
         },
         "required": ["ip", "as"],
         "additionalProperties": false
@@ -91,10 +91,16 @@
       "type": "object",
       "description": "Change the default Calico environment properties",
       "properties": {
-        "FELIX_USAGEREPORTINGENABLED": {"type": ["string"], "default": "'false'"},
-        "WAIT_FOR_DATASTORE": {"type": ["string"], "default": "'true'"},
-        "FELIX_DEFAULTENDPOINTTOHOSTACTION": {"type": "string", "default": "ACCEPT"},
-        "CALICO_ROUTER_ID": {"type": "string"}
+        "FELIX_USAGEREPORTINGENABLED": {
+          "type": ["string"],
+          "default": "'false'"
+        },
+        "WAIT_FOR_DATASTORE": { "type": ["string"], "default": "'true'" },
+        "FELIX_DEFAULTENDPOINTTOHOSTACTION": {
+          "type": "string",
+          "default": "ACCEPT"
+        },
+        "CALICO_ROUTER_ID": { "type": "string" }
       },
       "additionalProperties": {
         "type": ["string", "object"]
@@ -224,11 +230,27 @@
   },
   "propertyNames": {
     "anyOf": [
-      {"$ref": "generic_plugin.json#/definitions/PropertyNames"},
-      {"enum": [
-        "version", "mode", "crossSubnet", "natOutgoing", "mtu", "fullmesh", "announceServices", "defaultAsNumber",
-        "globalBgpPeers", "typha", "env", "cni", "node", "kube-controllers", "flexvol", "apiserver"
-      ]}
+      { "$ref": "generic_plugin.json#/definitions/PropertyNames" },
+      {
+        "enum": [
+          "version",
+          "mode",
+          "crossSubnet",
+          "natOutgoing",
+          "mtu",
+          "fullmesh",
+          "announceServices",
+          "defaultAsNumber",
+          "globalBgpPeers",
+          "typha",
+          "env",
+          "cni",
+          "node",
+          "kube-controllers",
+          "flexvol",
+          "apiserver"
+        ]
+      }
     ]
   }
 }
