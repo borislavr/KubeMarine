@@ -44,7 +44,7 @@ dependencies = [
     # Each time cryptography version is updated, need to regenerate scripts/ci/custom-hooks/hook-cryptography.py
     "cryptography==43.0.1",
     "paramiko==3.4.*",
-    "jsonschema==4.22.*",
+    "jsonschema==4.23.*",
     "referencing==0.35.*",
     "typing_extensions==4.11.*",
     "pathvalidate==3.2.*",
