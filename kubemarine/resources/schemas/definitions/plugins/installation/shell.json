@@ -2,17 +2,17 @@
   "$schema": "http://json-schema.org/draft-07/schema",
   "description": "Execute shell code on remote hosts. Can be either a command string or a dictionary with the extra parameters.",
   "oneOf": [
-    {"type": "string", "minLength": 1},
+    { "type": "string", "minLength": 1 },
     {
       "type": "object",
       "properties": {
         "command": {
           "description": "A shell command(s) to be executed on remote hosts. If the list of commands is provided, they will be joint with '&&'.",
           "oneOf": [
-            {"type": "string", "minLength": 1},
+            { "type": "string", "minLength": 1 },
             {
               "type": "array",
-              "items": {"type": "string", "minLength": 1},
+              "items": { "type": "string", "minLength": 1 },
               "minItems": 1
             }
           ]
