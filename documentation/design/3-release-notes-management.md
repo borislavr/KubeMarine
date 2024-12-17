@@ -23,6 +23,6 @@ What becomes easier or more difficult to do and any risks introduced by the chan
 
 ## Considered Options
 
-1. Update gitlab CI.  Run in docker  `migrate_kubemarine --list` and `migrate_kubemarine --describe`
-2. Update githab CI.  Run in `migrate_kubemarine --list` and `migrate_kubemarine --describe`
-3. 
+1. Update gitlab CI. Run in docker `migrate_kubemarine --list` and `migrate_kubemarine --describe`
+2. Update githab CI. Run in `migrate_kubemarine --list` and `migrate_kubemarine --describe`
+3.

@@ -48,15 +48,15 @@
     "OneOfNodesGroupsSpec": {
       "type": "object",
       "oneOf": [
-        {"$ref": "#/definitions/GroupsSpec"},
-        {"$ref": "#/definitions/NodesSpec"}
+        { "$ref": "#/definitions/GroupsSpec" },
+        { "$ref": "#/definitions/NodesSpec" }
       ]
     },
     "AnyOfNodesGroupsSpec": {
       "type": "object",
       "anyOf": [
-        {"$ref": "#/definitions/GroupsSpec"},
-        {"$ref": "#/definitions/NodesSpec"}
+        { "$ref": "#/definitions/GroupsSpec" },
+        { "$ref": "#/definitions/NodesSpec" }
       ]
     },
     "GroupsSpec": {
