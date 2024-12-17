@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema",
   "type": "object",
   "description": "Name (identifier) of the custom plugin",
-  "allOf": [{"$ref": "#/definitions/Properties"}],
+  "allOf": [{ "$ref": "#/definitions/Properties" }],
   "definitions": {
     "Properties": {
       "properties": {
@@ -28,7 +28,7 @@
       "type": "object",
       "description": "Set custom nodeSelectors for the plugin in order to influence pods scheduling for the plugin",
       "properties": {
-        "kubernetes.io/os": {"type": "string", "default": "linux"}
+        "kubernetes.io/os": { "type": "string", "default": "linux" }
       }
     },
     "RequestsLimitsForContainer": {
@@ -39,8 +39,8 @@
           "type": "object",
           "description": "Set memory, cpu and storage values for requests/limits",
           "properties": {
-            "memory": {"type": ["string", "integer"]},
-            "cpu": {"type": ["string", "integer"]}
+            "memory": { "type": ["string", "integer"] },
+            "cpu": { "type": ["string", "integer"] }
           },
           "additionalProperties": false
         }
