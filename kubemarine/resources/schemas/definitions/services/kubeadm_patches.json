@@ -27,8 +27,8 @@
       "minItems": 0,
       "items": {
         "oneOf": [
-          {"$ref": "#/definitions/ControlPlanePodPatch"},
-          {"$ref": "../common/utils.json#/definitions/ListMergingSymbol"}
+          { "$ref": "#/definitions/ControlPlanePodPatch" },
+          { "$ref": "../common/utils.json#/definitions/ListMergingSymbol" }
         ]
       }
     },
@@ -38,8 +38,8 @@
       "minItems": 0,
       "items": {
         "oneOf": [
-          {"$ref": "#/definitions/KubeletPatch"},
-          {"$ref": "../common/utils.json#/definitions/ListMergingSymbol"}
+          { "$ref": "#/definitions/KubeletPatch" },
+          { "$ref": "../common/utils.json#/definitions/ListMergingSymbol" }
         ]
       }
     },
@@ -99,10 +99,12 @@
     },
     "KubeletProperties": {
       "type": "object",
-      "allOf": [{"$ref": "#/definitions/Flags"}],
+      "allOf": [{ "$ref": "#/definitions/Flags" }],
       "properties": {
-        "podPidsLimit": {"$ref": "kubeadm_kubelet.json#/definitions/PodPidsLimit"},
-        "maxPods": {"$ref": "kubeadm_kubelet.json#/definitions/MaxPods"}
+        "podPidsLimit": {
+          "$ref": "kubeadm_kubelet.json#/definitions/PodPidsLimit"
+        },
+        "maxPods": { "$ref": "kubeadm_kubelet.json#/definitions/MaxPods" }
       }
     }
   }
