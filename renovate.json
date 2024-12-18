@@ -1,13 +1,3 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
-  ],
-  "packageRules": [
-    {
-      "matchDatasources": ["docker"],
-      "matchPackageNames": ["alpine"],
-      "allowedVersions": "< 3.20.0"
-    }
-  ]
+  "extends": ["github>borislavr/renovate-config"]
 }
