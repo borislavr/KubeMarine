@@ -1,0 +1,32 @@
+name: Anchore Scan
+on:
+  workflow_dispatch:
+    inputs:
+      image:
+        type: string
+        default: ''
+        required: false
+permissions:
+  contents: read
+jobs:
+  anchore:
+    permissions:
+      contents: read
+      security-events: write
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+############## Project scan ###################################
+      - name: Scan current project
+        id: scan-current-project
+        uses: anchore/scan-action@v6
+        with:
+          path: "."
+          fail-build: false
+      - name: Upload SARIF result
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.scan-current-project.outputs.sarif }}
