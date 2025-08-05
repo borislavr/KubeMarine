@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Build ipip_check binary
-FROM golang:1.22 AS go-build
+FROM golang:1.24 AS go-build
 
 WORKDIR /opt
 
@@ -11,7 +11,7 @@ RUN go mod download && \
     GOOS=linux CGO_ENABLED=1 go build -ldflags="-linkmode external -extldflags='-static'" -o ipip_check -buildvcs=false && \
     gzip ipip_check
 
-FROM python:3.12-slim-bullseye AS python-build
+FROM python:3.12-slim-bookworm AS python-build
 
 ARG BUILD_TYPE
 
@@ -38,7 +38,7 @@ RUN apt update && \
     else \
       pip3 install --no-cache-dir $(ls dist/*.whl)[ansible]; \
       apt install -y wget; \
-      wget -O - https://get.helm.sh/helm-v3.14.4-linux-amd64.tar.gz | tar xvz -C /usr/local/bin  linux-amd64/helm --strip-components 1; \
+      wget -O - https://get.helm.sh/helm-v3.18.3-linux-amd64.tar.gz | tar xvz -C /usr/local/bin  linux-amd64/helm --strip-components 1; \
       apt autoremove -y wget; \
       rm -r *; \
     fi && \

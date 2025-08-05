@@ -377,6 +377,7 @@ def reboot_group(group: NodeGroup, try_graceful: bool = None) -> RunnersGroupRes
         if cordon_required:
             res = first_control_plane.sudo(f'kubectl uncordon {node_name}', warn=True)
             log.verbose(res)
+
         results.update(raw_results)
 
     return RunnersGroupResult(cluster, results)

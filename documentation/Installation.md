@@ -13,6 +13,7 @@ This section provides information about the inventory, features, and steps for i
   - [Deployment Schemes](#deployment-schemes)
     - [Non-HA Deployment Schemes](#non-ha-deployment-schemes)
       - [All-in-one Scheme](#all-in-one-scheme)
+      - [One Control Plane and Many Workers Schema](#one-control-plane-and-many-workers-schema)
     - [HA Deployment Schemes](#ha-deployment-schemes)
       - [Mini-HA Scheme](#mini-ha-scheme)
       - [Full-HA Scheme](#full-ha-scheme)
@@ -62,6 +63,7 @@ This section provides information about the inventory, features, and steps for i
       - [Application Prerequisites](#application-prerequisites)
     - [RBAC Accounts](#rbac-accounts)
       - [RBAC account_defaults](#rbac-account_defaults)
+    - [RBAC Authenticated Issuer Discovery](#rbac-authenticated-issuer-discovery)
     - [Plugins](#plugins)
       - [Predefined Plugins](#predefined-plugins)
         - [calico](#calico)
@@ -166,10 +168,10 @@ For cluster machines, ensure the following requirements are met:
   * Centos 7.5+, 8.4, 9
   * RHEL 7.5+, 8.4, 8.6, 8.7, 8.8, 8.9, 9.2
   * Oracle Linux 7.5+, 8.4, 9.2
-  * RockyLinux 8.6, 8.7, 8.8, 9.2, 9.3 ,9.4
+  * RockyLinux 8.6, 8.7, 8.8, 9.2, 9.3 ,9.4, 9.5
   * Ubuntu 20.04, 22.04.1, 24.04.1
  
-**Note**: Ubuntu 24.04 is supported only with latest kubernetes versions: v1.29.7, v1.30.3, v1.31.1. 
+**Note**: Ubuntu 24.04 is supported only with kubernetes versions starting from v1.29.7 and above.
 
 <!-- #GFCFilterMarkerStart# -->
 The actual information about the supported versions can be found in `compatibility_map.distributives` section of [globals.yaml configuration](../kubemarine/resources/configurations/globals.yaml#L256).
@@ -179,33 +181,33 @@ The actual information about the supported versions can be found in `compatibili
 
 * Opened TCP-ports:
   * Internal communication:
-    * 22 : SSH 
-    * 53 : CoreDNS, if access is needed from services bound to the host network.
+    * 22: SSH 
+    * 53: CoreDNS, if access is needed from services bound to the host network.
     * 80 (or 20080, if balancers are presented): HTTP
-    * 179 : Calico BGP
+    * 179: Calico BGP
     * 443 (or 20443, if balancers are presented): HTTPS
-    * 5443 : Calico API server, if enabled
-    * 5473 : Calico networking with Typha enabled
-    * 6443 : Kubernetes API server
-    * 8443 : Ingress NGINX validating webhook
-    * 2379-2380 : ETCD server & client API
-    * 9091 : Calico metrics port
-    * 9093 : Calico Typha metrics port
-    * 10250 : Kubelet API
-    * 30000-32767 : NodePort Services
+    * 5443: Calico API server, if enabled
+    * 5473: Calico networking with Typha enabled
+    * 6443: Kubernetes API server
+    * 8443: Ingress NGINX validating webhook
+    * 2379-2380: ETCD server & client API
+    * 9091: Calico metrics port
+    * 9093: Calico Typha metrics port
+    * 10250: Kubelet API
+    * 30000-32767: NodePort Services
     * Other ports if communication happens between services with any participant bound to the host network.
   * External communication:
-    * 22 : SSH, if you use external nodes' IP addresses to deploy the cluster.
+    * 22: SSH, if you use external nodes' IP addresses to deploy the cluster.
     * 80
     * 443
-    * 6443 : Kubernetes API server, if necessary to access externally. For example, using the [helm](#helm) plugin.
+    * 6443: Kubernetes API server, if necessary to access externally. For example, using the [helm](#helm) plugin.
 * Opened UDP-ports:
   * Internal communication:
-    * 53 : CoreDNS, if access is needed from services bound to the host network.
-    * 4789 : Calico VxLAN encapsulation, if that type of encapsulation is enabled
+    * 53: CoreDNS, if access is needed from services bound to the host network.
+    * 4789: Calico VxLAN encapsulation, if that type of encapsulation is enabled
 * Enabled additional protocols:
   * **VRRP**: protocol is using by keepalived to manage vIP between nodes with role **balancer**. IP protocol number - 112
-  * **IPIP**: protocol is using for communication between kubernetes nodes of several clusters in Active-Active scheme only. Make shure **IPIP** protocol is added to all Security Groups in OpenStack and allowed on all intermediate network devices. IP protocol number - 4
+  * **IPIP**: protocol is using for communication between kubernetes nodes of several clusters in Active-Active scheme only. Make shure **IPIP** protocol is added to all Security Groups in OpenStack and allowed on all intermediate network devices. IP protocol number - 4.
 * Internal network bandwidth not less than 1GBi/s.
 * Dedicated internal address, IPv4, and IPv6 are supported as well, for each VM.
 * Any network security policies are disabled or whitelisted. This is especially important for OpenStack environments.
@@ -312,7 +314,7 @@ The recommended hardware requirements are as follows:
 
 Kubernetes clusters use the following important folders:
 
-**/var/lib/etcd** - It is used for the etcd database storage at the control-plane nodes. Etcd is very sensitive to disk performance so it is recommended to put /var/lib/etcd to a separate fast disk (for example, SSD). The size of this disk depends on the etcd database size, but not less than 4 GB. 
+**/var/lib/etcd** - It is used for the etcd database storage at the control-plane nodes. Etcd is very sensitive to disk performance so it is recommended to put `/var/lib/etcd` to a separate fast disk, for example, SSD. The size of this disk depends on the etcd database size, but not less than 4 GB. 
 For more information about etcd disks, refer to the [ETCD Recommendation](#etcd-recommendation) section.
 
 **/var/lib/containerd** - It is a working directory of containerd, and is used for active container runtimes and storage of local images. 
@@ -325,22 +327,22 @@ For control-plane nodes, it should be at least 20 GB, whereas, for worker nodes,
 #### Disk Pressure
 
 To detect DiskPressure events for nodes, Kubernetes controls the `nodefs` and `imagefs` file system partitions.
-The `nodefs` (or `rootfs`) is the node's main filesystem used for local disk volumes, emptyDir, log storage, and so on. By default, it is /var/lib/kubelet.
+The `nodefs` (or `rootfs`) is the node's main filesystem used for local disk volumes, emptyDir, log storage, and so on. By default, it is `/var/lib/kubelet`.
 
 The `imagefs` is an optional filesystem that the container runtimes use to store container images and container writable layers.
-For containerd, it is the filesystem containing /var/lib/containerd/io.containerd.snapshotter.v1.overlayfs.
+For containerd, it is the filesystem containing `/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs`.
 
 If `nodefs` or `imagefs` reach the eviction thresholds (`100% - nodefs.available`, `100% - imagefs.available`), the DiskPressure condition becomes true and the pods start being evicted from the node. So it is crucially important not to allow disk fulfillment coming to the eviction threshold for both nodefs and imagefs.
 
 ### ETCD Recommendation
 
-For a cluster with a high load on the ETCD, it is strongly recommended to mount dedicated SSD-volumes in the ETCD-storage directory (4 GB size at least is recommended) on each Control-plane before the installation.
+For a cluster with a high load on the ETCD, it is strongly recommended to mount the dedicated SSD-volumes in the ETCD-storage directory (4 GB size at least is recommended) on each Control-plane before the installation.
 Mount point:
 
 ```
 /var/lib/etcd
 ```
-[General H/W recommendations](https://etcd.io/docs/latest/op-guide/hardware/)
+For more information about general hardware recommendations, refer to the _Official ETCD Documentation_ at [https://etcd.io/docs/latest/op-guide/hardware/](https://etcd.io/docs/latest/op-guide/hardware/).
 
 ### SSH Key Recommendation 
 
@@ -394,6 +396,24 @@ An example of this scheme is available in the [All-in-one Inventory Example](../
 The following image illustrates the All-in-one scheme.
 
 ![All-in-one Scheme](/documentation/images/all-in-one.png)
+
+#### One Control Plane and Many Workers Schema
+
+This schema might be useful if:
+* You want a development environment, where you do not care about HA;
+* AND you want to use multiple workers (otherwise, All-in-one schema could be used);
+* AND you have slow disks, so you want to avoid etcd replication overhead (otherwise, Mini-HA schema could be used);
+* AND you do not want to bother with vIP configuration (otherwise, you could combine control-plane and balancer role on one node, without explicit ingress-nginx placement).
+
+In this case, you can use schema with single control plane node (which runs ingress-nginx) and many (1 or more) workers.
+An example of this schema is available in the [One Control Plane and Many Workers Inventory Example](../examples/cluster.yaml/one-cp-many-workers-cluster.yaml).
+
+**Note**: Optionally, if you want control-plane node to be able to run workloads, 
+you need to add "worker" role to this node.
+
+The following image illustrates the "One Control Plane and Many Workers" schema.
+
+<img src="/documentation/images/one-cp-many-workers.png" width="600"/>
 
 ### HA Deployment Schemes
 
@@ -455,7 +475,7 @@ Where:
  * VALUE is the value for the taint.
  * EFFECT is the effect for the taint behavior. It can be one of NoSchedule, PreferNoSchedule, or NoExecute.
 
-To deploy pods on tainted nodes, you should define the toleration section:
+To deploy pods on tainted nodes, define the toleration section:
 
 ```YAML
 tolerations:
@@ -490,7 +510,7 @@ services:
 
 #### Plugins Deployment with Node Taints 
 
-The plugins also require the tolerations section in case of node taints. The Calico pods already have tolerations to be assigned to all the cluster nodes. But for other plugins, it should be set in cluster.yaml. For more information, see [Tolerations](#tolerations).
+The plugins also require the tolerations section in case of node taints. The Calico pods already have tolerations to be assigned to all the cluster nodes. However, for other plugins, it should be set in cluster.yaml. For more information, see [Tolerations](#tolerations).
 
 If you create your own plugins, the tolerations settings should be taken into account.
 
@@ -523,7 +543,7 @@ The known IDEs that support validation are:
 The inventory file consists of the following sections.
 
 ### globals
-In the `globals` section you can describe the global parameters that can be overridden. For example:
+In the `globals` section, you can describe the global parameters that can be overridden. For example:
 
 ```
 globals:
@@ -549,8 +569,8 @@ The following parameters are supported:
 | `expect.pods.plugins.retries`    | int  | no        | 150           | `300`   | Number of retires to check pods readiness in `plugins`                                                             |
 | `nodes.ready.timeout`            | int  | no        | 5             | `10`    | Timeout between `nodes.ready.retries` for cluster node readiness waiting                                           |
 | `nodes.ready.retries`            | int  | no        | 15            | `60`    | Number of retries to check a cluster node readiness                                                                |
+| `nodes.dpkg_lock_timeout_seconds` | int | no | 1200 | `-1` | Number of seconds to wait for acquiring dpkg lock if it is taken by e.g. unattended upgrade. Value of -1 means wait infinitely |
 | `ignore_unavailable_nodes_for_etchosts_update` | boolean  | no        | false            | false    | Allow to run `prepare.dns.etc_hosts`, `update.etc_hosts` tasks when some nodes are unavailable. **Do not change the default value unless you know what for!**                    |
-
 
 ### node_defaults
 
@@ -596,9 +616,9 @@ Following are the parameters allowed to be specified in the `node_defaults` sect
 * labels, and taints - specify at global level only if the [Mini-HA Scheme](#mini-ha-scheme) is used.
 For more information about the listed parameters, refer to the following section.
 
-Note: To establish an ssh connection, you can use either a keyfile or a password. In case if you are specifying both, keyfile will be considered on priority.
+**Note**: To establish an ssh connection, you can use either a keyfile or a password. In case if you are specifying both, keyfile will be considered on priority.
 
-Note: Set an environment variable with the desired password. For example, you can use `export PASS="your_password"`. In the cluster.yaml file, specify the password field using the environment variable syntax. For instance: `password: '{{ env.PASS }}'`. This syntax instructs the code to fetch the value from the PASS environment variable and substitute it into the password field when reading the configuration file. See more details about [environment variables](#environment-variables).
+**Note**: Set an environment variable with the desired password. For example, you can use `export PASS="your_password"`. In the cluster.yaml file, specify the password field using the environment variable syntax. For instance: `password: '{{ env.PASS }}'`. This syntax instructs the code to fetch the value from the PASS environment variable and substitute it into the password field when reading the configuration file. See [environment variables](#environment-variables) for more details.
 
 ### nodes
 
@@ -608,7 +628,7 @@ The following options are supported:
 
 |Name|Type|Mandatory|Default Value|Example|Description|
 |---|---|---|---|---|---|
-|keyfile|string|no| |`/home/username/.ssh/id_rsa`|**Absolute** path to keyfile on local machine to access the cluster machines, Either a keyfile or a password should be provided|
+|keyfile|string|no| |`/home/username/.ssh/id_rsa`|**Absolute** path to keyfile on local machine to access the cluster machines, either a keyfile or a password should be provided|
 |password|string|no| |`password@123`|Password to access the cluster machines, either a keyfile or a password should be provided|
 |username|string|no|`root`|`centos`|Username for SSH-access the cluster machines|
 |name|string|no| |`k8s-control-plane-1`|Cluster member name. If omitted, Kubemarine calculates the name by the member role and position in the inventory. Note that this leads to undefined behavior when adding or removing nodes.|
@@ -799,7 +819,7 @@ public_cluster_ip: "10.102.0.1"
 
 ### registry
 
-If you want to install Kubernetes in a private environment, without access to the internet, then you
+If you want to install Kubernetes in a private environment without access to the internet, then you
 need to redefine the addresses of remote resources. These resources are many, so for convenience 
 there is a single unified registry parameter that allows you to specify the registry for everything 
 at once. To do this, you need to specify `registry` section in the root of the inventory and fill it
@@ -939,8 +959,8 @@ The following parameters are supported:
 |**name**|string|**yes**|Gateway node name|
 |**address**|ip address|**yes**|Gateway node's IP or hostname address for connection|
 |**username**|string|**yes**|Username for SSH-access the gateway node|
-|**keyfile**|string|no|**Absolute** path to keyfile on local machine to access the cluster machines, Either a keyfile or a password should be provided|
-|**password**|string|no|Password to access the cluster machines, Either a keyfile or a password should be provided|
+|**keyfile**|string|no|**Absolute** path to keyfile on local machine to access the cluster machines, either a keyfile or a password should be provided|
+|**password**|string|no|Password to access the cluster machines, either a keyfile or a password should be provided|
 
 An example is as follows:
 
@@ -1090,12 +1110,12 @@ In the `services` section, you can configure the service settings. The settings 
 *OS specific*: No
 
 In the `services.kubeadm` section, you can override the original settings for kubeadm.
-For more information about these settings, refer to the official Kubernetes documentation at [https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/#config-file](https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/#config-file).
+For more information about these settings, refer to the _Official Kubernetes Documentation_ at [https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/#config-file](https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/#config-file).
 By default, the installer uses the following parameters:
 
 | Parameter                                               | Default Value                                            | Description                                                                            |
 |---------------------------------------------------------|----------------------------------------------------------|----------------------------------------------------------------------------------------|
-| kubernetesVersion                                       | `v1.30.3`                                               |                                                                                        |
+| kubernetesVersion                                       | `v1.32.2`                   |                                           |
 | controlPlaneEndpoint                                    | `{{ cluster_name }}:6443`                                |                                                                                        |
 | networking.podSubnet                                    | `10.128.0.0/14` for IPv4 or `fd02::/48` for IPv6         |                                                                                        |
 | networking.serviceSubnet                                | `172.30.0.0/16` for IPv4 or `fd03::/112` for IPv6        |                                                                                        |
@@ -1151,7 +1171,7 @@ services:
 
 **Note**: These kubeadm parameters can be reconfigured after installation using [Reconfigure Procedure](Maintenance.md#reconfigure-procedure).
 
-During init, join, upgrade procedures kubeadm runs `preflight` procedure to do some preliminary checks. In case of any error kubeadm stops working. Sometimes it is necessary to ignore some preflight errors to deploy or upgrade successfully.
+During init, join, upgrade procedures kubeadm runs `preflight` procedure to do some preliminary checks. In case of any error, kubeadm stops working. Sometimes it is necessary to ignore some preflight errors to deploy or upgrade successfully.
 
 Kubemarine allows to configure kubeadm preflight errors to be ignored.
 
@@ -1174,7 +1194,7 @@ services:
 
 #### Kubernetes version
 
-By default, the `v1.30.3` version of the Kubernetes is installed. See the table of supported versions for details in [Supported versions section](#supported-versions). However, we recommend that you explicitly specify the version you are about to install. This version applies into all the dependent parameters - images, binaries, rpms, configurations: all these are downloaded and used according to your choice. To specify the version, use the following parameter as in example:
+By default, the `v1.30.3` version of the Kubernetes is installed. See the table of supported versions for details in [Supported versions section](#supported-versions). However, we recommend that you explicitly specify the version you are about to install. This version applies into all the dependent parameters - images, binaries, rpms, configurations. All these are downloaded and used according to your choice. To specify the version, use the following parameter as in example:
 
 ```yaml
 services:
@@ -1369,11 +1389,11 @@ services:
 *OS specific*: No
 
 In the `services.kubeadm_kube-proxy` section, you can override the original settings for kube-proxy.
-For more information about these settings, refer to the official Kubernetes documentation at [https://kubernetes.io/docs/reference/config-api/kube-proxy-config.v1alpha1/#kubeproxy-config-k8s-io-v1alpha1-KubeProxyConfiguration](https://kubernetes.io/docs/reference/config-api/kube-proxy-config.v1alpha1/#kubeproxy-config-k8s-io-v1alpha1-KubeProxyConfiguration).
+For more information about these settings, refer to the _Official Kubernetes Documentation_ at [https://kubernetes.io/docs/reference/config-api/kube-proxy-config.v1alpha1/#kubeproxy-config-k8s-io-v1alpha1-KubeProxyConfiguration](https://kubernetes.io/docs/reference/config-api/kube-proxy-config.v1alpha1/#kubeproxy-config-k8s-io-v1alpha1-KubeProxyConfiguration).
 
 **Note**: `conntrack.min` inherits the `services.sysctl.net.netfilter.nf_conntrack_max` value from [sysctl](#sysctl), therefore if you would like to change this variable, set the desired value in `services.sysctl.net.netfilter.nf_conntrack_max`.
 
-**Note**: These parameters can be reconfigured after installation using [Reconfigure Procedure](Maintenance.md#reconfigure-procedure).
+**Note**: These parameters can be reconfigured after installation using the [Reconfigure Procedure](Maintenance.md#reconfigure-procedure).
 
 #### kubeadm_patches
 
@@ -1428,7 +1448,7 @@ services:
 
 By default, Kubemarine sets `bind-address` parameter of `kube-apiserver` to `node.internal_address` via patches at every control-plane node.
 
-**Note**: These parameters can be reconfigured after installation using [Reconfigure Procedure](Maintenance.md#reconfigure-procedure).
+**Note**: These parameters can be reconfigured after installation using the [Reconfigure Procedure](Maintenance.md#reconfigure-procedure).
 
 **Note**: If a parameter of control-plane pods is defined in `kubeadm.<service>.extraArgs` or is set by default by kubeadm and then redefined in `services.kubeadm_patches`, the pod manifest file will contain the same flag twice, the value taken from services.kubeadm_patches will be in the end of the arguments list.
 
@@ -1588,7 +1608,7 @@ The following parameters are supported:
 |replace-repositories|`false`|Deletes old repositories on hosts and installs new ones instead.|
 |repositories| |List of new repositories.|
 
-In the repositories section, you need to specify new repositories to install. The contents of their configurations can be arbitrary and is directly forwarded into the yum repo files.
+In the repositories section, you need to specify the new repositories to install. The contents of their configurations can be arbitrary and is directly forwarded into the yum repo files.
 
 For example in CentOS:
 
@@ -1628,7 +1648,7 @@ services:
         - "deb [arch=amd64 trusted=yes] http://example.com/deb/misc/docker-ce/debian/ buster stable"
 ```
 
-**Note**: You cannot and do not need to specify repositories for different package managers. The package manager is detected automatically and the specified configuration should match it.
+**Note**: You cannot specify the repositories for different package managers. The package manager is detected automatically and the specified configuration should match it.
 
 **Note**: You can use secure repositories with credentials as for [thirdparties](#secure-registries-for-thirdparties).
 
@@ -2030,7 +2050,7 @@ services:
         config_location: '/etc/containerd/config.toml'
 ```
 
-In case when you should redefine associations for multiple OS families at once, you should define their names in the root of `associations` in the following way:
+In case when you need to redefine associations for multiple OS families at once, you should define their names in the root of `associations` in the following way:
 
 ```yaml
 services:
@@ -2216,7 +2236,7 @@ services:
         sandbox_image: registry.k8s.io/pause:3.9
 ```
 
-Also, it is possible to specify registries configuration in registries hosts format using `containerdRegistriesConfig` section:
+Also, it is possible to specify the registries configuration in registries hosts format using `containerdRegistriesConfig` section:
 ```yaml
 services:
   cri:
@@ -2257,7 +2277,7 @@ services:
 ```
 
 **Note**: `registry.mirrors` and `registries.configs.tls` can't be used with `config_path` or `containerdRegistriesConfig`
-because it's restricted by containerd. In that case kubemarine fails with exception during enrichment.
+because it's restricted by containerd. In that case, kubemarine fails with exception during enrichment.
 
 Although, `registry.mirrors` and `registries.configs` are deprecated, when the registry requires an authentication, 
 it should be specified using `registries.configs.auth`, as in following example:
@@ -2311,7 +2331,7 @@ services:
 ```
 
 Note how `containerdConfig` and `containerdRegistriesConfig.<registry>` sections reflect the toml format structure.
-For more details on containerd configuration, refer to the official containerd configuration file documentation at [https://github.com/containerd/containerd/blob/main/docs/cri/config.md](https://github.com/containerd/containerd/blob/main/docs/cri/config.md).
+For more details on containerd configuration, refer to the _Official containerd configuration file documentation_ at [https://github.com/containerd/containerd/blob/main/docs/cri/config.md](https://github.com/containerd/containerd/blob/main/docs/cri/config.md).
 By default, the following parameters are used for `containerdConfig`:
 
 ```yaml
@@ -2532,7 +2552,7 @@ The following settings are supported in the extended format:
 |**nodes**|no|`None`|The list of node names where the parameter should be set.|
 |**install**|no|`true`|Whether the parameter is managed (installed, checked) by Kubemarine. The property is `true` for custom parameters by default, and calculated for standard parameters. To learn what parameters are installed by default, refer to their description in the previous table.|
 
-**Note**: You can specify nodes and groups at the same time.
+**Note**: You can specify the nodes and groups at the same time.
 
 **Note**: If no groups or nodes are specified, then the parameter is installed on all nodes.
 
@@ -2558,7 +2578,7 @@ The following settings are supported in the extended format:
 
 *OS specific*: No
 
-For more information about Kubernetes auditing, refer to the official documentation at [https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/](https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/).
+For more information about Kubernetes auditing, refer to the _Official Documentation_ at [https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/](https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/).
 
 **Logging level**:
 `None` - do not log;
@@ -2761,7 +2781,7 @@ For Kubernetes and ETCD to work correctly, it is recommended to configure the sy
 
 *OS specific*: Yes, performs only on the RHEL OS family.
 
-**Warning:** incorrect time synchronization can lead to incorrect operation of the cluster or services. You can validate
+**Warning:** Incorrect time synchronization can lead to incorrect operation of the cluster or services. You can validate
 the time synchronization via the [Time difference](Kubecheck.md#218-time-difference) test between the nodes from 
 [PAAS Check procedure](Kubecheck.md#paas-procedure).
 
@@ -3001,7 +3021,7 @@ If `services.coredns.add_etc_hosts_generated` is set to `true`, `Hosts` is enric
 
 If `Hosts` is redefined in the `cluster.yaml` its default value is overridden. 
 
-Before working with the Corefile, refer to the official Coredns plugins documentation at [https://coredns.io/plugins/](https://coredns.io/plugins/).
+Before working with the Corefile, refer to the _Official Coredns plugins documentation_ at [https://coredns.io/plugins/](https://coredns.io/plugins/).
 
 The Corefile consists of the settings applied for a specific destination. By default, all settings are applied for `.:53` destination. 
 For example:
@@ -3327,7 +3347,7 @@ These settings can be overrided in the **cluster.yaml**. Currently, the followin
 </tbody>
 </table>
 
-For more information on Haproxy-related parameters, refer to the official Haproxy documentation at [https://www.haproxy.org/download/1.8/doc/configuration.txt](https://www.haproxy.org/download/1.8/doc/configuration.txt).
+For more information on Haproxy-related parameters, refer to the _Official Haproxy documentation_ at [https://www.haproxy.org/download/1.8/doc/configuration.txt](https://www.haproxy.org/download/1.8/doc/configuration.txt).
 
 **Note**: you can use either `config` or `config_file` if you need to use custom config instead of default.
 
@@ -3744,6 +3764,29 @@ rbac:
 
 The yaml file that is created from the above template is applied to the cluster during the installation procedure.
 
+### RBAC Authenticated Issuer Discovery
+
+*Installation task*: `deploy.accounts`
+
+To configure service account issuer discovery authentication you can use
+following flag:
+```yaml
+rbac:
+  authenticated-issuer-discovery: false
+```
+
+By default, KubeMarine sets this flag to `false`, 
+which allows unauthenticated access to 
+service account issuer discovery endpoint, usually found at 
+`https://<cluster_ip>:6443/.well-known/openid-configuration/`. 
+
+This is different from default K8s behavior, 
+where this endpoint requires authentication.
+We disable authentication by default, 
+because some applications do not support authentication 
+on OIDC discovery endpoints.
+For more information see https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#service-account-issuer-discovery
+
 ### Plugins
 
 *Installation task*: `deploy.plugins`
@@ -3766,11 +3809,11 @@ When you want to install a plugin, the installer includes pre-configured plug-in
 
 ##### calico
 
-Before proceeding, refer to the [Official Documentation of the Kubernetes Cluster Network](https://kubernetes.io/docs/concepts/cluster-administration/networking/).
+Before proceeding, refer to the _Official Documentation of the Kubernetes Cluster Network_ at [https://kubernetes.io/docs/concepts/cluster-administration/networking/](https://kubernetes.io/docs/concepts/cluster-administration/networking/).
 
-Calico plugin is installed by default and does not require any special enablement or configuration. However it is possible to explicitly enable or disable the installation of this plugin through the `install` plugin parameter.
+Calico plugin is installed by default and does not require any special enablement or configuration. However, it is possible to explicitly enable or disable the installation of this plugin through the `install` plugin parameter.
 
-**Warning**: According to the Calico kernel requirements, CentOS 7 with a kernel lower than `3.10.0-940.el7.x86_64` is not compatible with Calico 3.24 and higher. For more information, refer to [Kubernetes requirements](https://docs.tigera.io/calico/3.24/getting-started/kubernetes/requirements#kubernetes-requirements).
+**Warning**: According to the Calico kernel requirements, CentOS 7 with a kernel lower than `3.10.0-940.el7.x86_64` is not compatible with Calico 3.24 and higher. For more information, refer to Kubernetes requirements_ at [https://docs.tigera.io/calico/3.24/getting-started/kubernetes/requirements#kubernetes-requirements](https://docs.tigera.io/calico/3.24/getting-started/kubernetes/requirements#kubernetes-requirements).
 
 The following is an example to enable the calico plugin:
 
@@ -4122,7 +4165,7 @@ If the intermediate certificate should be specified, set it in `/path/to/cert` f
 -----END CERTIFICATE-----
 ```
 
-* The `config_map` parameter is used to customize or fine tune NGINX behavior. Before proceeding, refer to the [Official NGINX Ingress Controller documentation](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/)
+* The `config_map` parameter is used to customize or fine tune NGINX behavior. Before proceeding, refer to the _Official NGINX Ingress Controller documentation_ at [https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/)
 For example:    
 ```yaml
   nginx-ingress-controller:
@@ -4155,7 +4198,7 @@ Default config_map settings:
 
 **Warning**: Ingress-nginx and HAproxy use proxy protocol in the default configuration. If you are using a load balancer without a proxy protocol, it **must** also be disabled in ingress-nginx. To do this, specify `use-proxy-protocol: "false"` in configmap.
 
-* The `custom_headers` parameter sets specified custom headers before sending the traffic to backends. Before proceeding, refer to the official NGINX Ingress Controller documentation at [https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/).
+* The `custom_headers` parameter sets specified custom headers before sending the traffic to backends. Before proceeding, refer to the _Official NGINX Ingress Controller documentation_ at [https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/).
 
 For example:    
 
@@ -4168,7 +4211,7 @@ For example:
       X-Using-Nginx-Controller: "true"
 ```
 
-* The `args` parameter is used to add cli arguments to ingress-nginx-controller. Before proceeding, refer to the official NGINX Ingress Controller documentation at [https://kubernetes.github.io/ingress-nginx/user-guide/cli-arguments/](https://kubernetes.github.io/ingress-nginx/user-guide/cli-arguments/).
+* The `args` parameter is used to add cli arguments to ingress-nginx-controller. Before proceeding, refer to the _Official NGINX Ingress Controller documentation_ at [https://kubernetes.github.io/ingress-nginx/user-guide/cli-arguments/](https://kubernetes.github.io/ingress-nginx/user-guide/cli-arguments/).
 
 For example:
 ```yaml
@@ -4185,7 +4228,7 @@ By default, 10254 port is opened and provides Prometheus metrics.
 
 ##### kubernetes-dashboard
 
-Before proceeding, refer to the [Official Documentation of the Kubernetes Dashboard UI](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/) and visit [official Kubernetes Dashboard repository](https://github.com/kubernetes/dashboard).
+Before proceeding, refer to the _Official Documentation of the Kubernetes Dashboard UI_ at [https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/) and visit [official Kubernetes Dashboard repository](https://github.com/kubernetes/dashboard).
 
 By default, the Kubernetes dashboard is not installed, as it is not a mandatory part of the cluster. However, you can install it by enabling the plugin.
 
@@ -4197,7 +4240,7 @@ plugins:
     install: true
 ```
 
-**Note**: By default Kubernetes dashboard is available at `dashboard.{{ cluster_name }}`.
+**Note**: By default, Kubernetes dashboard is available at `dashboard.{{ cluster_name }}`.
 
 **Note**: The Kubernetes Dashboards UI is available **only** via HTTPS.
 
@@ -5996,152 +6039,94 @@ If the task is skipped, then it is not able to schedule the cumulative point. Fo
 The tables below shows the correspondence of versions that are supported and is used during the installation:
 
 
-## Default Dependent Components Versions for Kubernetes Versions v1.27.13
+## Default Dependent Components Versions for Kubernetes Versions v1.31.6
 | Type     | Name                                                           | Versions         |                              |              |              |                   |           |           | Note                                                                                                       |
 |----------|----------------------------------------------------------------|------------------|------------------------------|--------------|--------------|-------------------|-----------|-----------|------------------------------------------------------------------------------------------------------------|
 |          |                                                                | CentOS RHEL 7.5+ | CentOS RHEL Oracle Linux 8.4 | Ubuntu 20.04,22.04 | Ubuntu 24.04 | Oracle Linux 7.5+ | RHEL 8.6+ | RockyLinux 8.6+ |                                                                                                      |
-| binaries | kubeadm                                                        | v1.27.13          | v1.27.13                      | v1.27.13      | unsupported   | v1.27.13           | v1.27.13   | v1.27.13   | SHA1: b8cc2038662975025dd17a94d9185ffc7a241222                                                             |
-|          | kubelet                                                        | v1.27.13          | v1.27.13                      | v1.27.13      | unsupported   | v1.27.13           | v1.27.13   | v1.27.13   | SHA1: 2a69d84c97133c44b3159f7ca9fd09d7e43f6b0f                                                             |
-|          | kubectl                                                        | v1.27.13          | v1.27.13                      | v1.27.13      | unsupported   | v1.27.13           | v1.27.13   | v1.27.13   | SHA1: fa0da5539a2b186ff276d1552700825b7fe49acd                                                             |
-|          | calicoctl                                                      | v3.26.4          | v3.26.4                      | v3.26.4      | unsupported  | v3.26.4           | v3.26.4   | v3.26.4   | SHA1: 46875b3d28318553fe382db0766a0916f2556217 Required only if calico is installed.                       |
-|          | crictl                                                         | v1.30.0          | v1.30.0                      | v1.30.0      | unsupported  | v1.30.0           | v1.30.0   | v1.30.0   | SHA1: c81e76d5d4bf64d6b513485490722d2fc0a9a83b                                                             |
-| rpms     | containerd.io                                                  | 1.6.*            | 1.6.*                        | 1.6.*        | unsupported  | 1.6.*             | 1.6.*     | 1.6.*     |                                                                                                            |
-|          | haproxy/rh-haproxy                                             | 1.8              | 1.8                          | 2.*          | unsupported  | 1.8               | 1.8       | 1.8       | Required only if balancers are presented in the deployment scheme.                                         |
-|          | keepalived                                                     | 1.3              | 2.1                          | 2.*          | unsupported  | 1.3               | 2.1       | 2.1       | Required only if VRRP is presented in the deployment scheme.                                               |
-| images   | registry.k8s.io/kube-apiserver                                 | v1.27.13          | v1.27.13                      | v1.27.13      | unsupported   | v1.27.13           | v1.27.13   | v1.27.13   |                                                                                                            |
-|          | registry.k8s.io/kube-controller-manager                        | v1.27.13          | v1.27.13                      | v1.27.13      | unsupported   | v1.27.13           | v1.27.13   | v1.27.13   |                                                                                                            |
-|          | registry.k8s.io/kube-proxy                                     | v1.27.13          | v1.27.13                      | v1.27.13      | unsupported   | v1.27.13           | v1.27.13   | v1.27.13   |                                                                                                            |
-|          | registry.k8s.io/kube-scheduler                                 | v1.27.13          | v1.27.13                      | v1.27.13      | unsupported   | v1.27.13           | v1.27.13   | v1.27.13   |                                                                                                            |
-|          | registry.k8s.io/coredns                                        | v1.10.1          | v1.10.1                      | v1.10.1      | unsupported  | v1.10.1           | v1.10.1   | v1.10.1   |                                                                                                            |
-|          | registry.k8s.io/pause                                          | 3.9              | 3.9                          | 3.9          | unsupported  | 3.9               | 3.9       | 3.9       |                                                                                                            |
-|          | registry.k8s.io/etcd                                           | 3.5.12-0         | 3.5.12-0                     | 3.5.12-0     | unsupported  | 3.5.12-0          | 3.5.12-0  | 3.5.12-0  |                                                                                                            |
-|          | calico/typha                                                   | v3.26.4          | v3.26.4                      | v3.26.4      | unsupported  | v3.26.4           | v3.26.4   | v3.26.4   | Required only if Typha is enabled in Calico config.                                                        |
-|          | calico/cni                                                     | v3.26.4          | v3.26.4                      | v3.26.4      | unsupported  | v3.26.4           | v3.26.4   | v3.26.4   |                                                                                                            |
-|          | calico/node                                                    | v3.26.4          | v3.26.4                      | v3.26.4      | unsupported  | v3.26.4           | v3.26.4   | v3.26.4   |                                                                                                            |
-|          | calico/kube-controllers                                        | v3.26.4          | v3.26.4                      | v3.26.4      | unsupported  | v3.26.4           | v3.26.4   | v3.26.4   |                                                                                                            |
-|          | calico/apiserver                                               | v3.26.4          | v3.26.4                      | v3.26.4      | unsupported  | v3.26.4           | v3.26.4   | v3.26.4   | Required only if API server is enabled in Calico config.                                                   |
-|          | registry.k8s.io/ingress-nginx/controller                       | v1.9.6           | v1.9.6                       | v1.9.6       | unsupported  | v1.9.6            | v1.9.6    | v1.9.6    |                                                                                                            |
-|          | registry.k8s.io/kube-webhook-certgen                           | v20231226-1a7112e06 | v20231226-1a7112e06 | v20231226-1a7112e06 | unsupported         | v20231226-1a7112e06 | v20231226-1a7112e06 | v20231226-1a7112e06 |                                                                              |
-|          | kubernetesui/dashboard                                         | v2.7.0           | v2.7.0                       | v2.7.0       | unsupported  | v2.7.0            | v2.7.0    | v2.7.0    | Required only if Kubernetes Dashboard plugin is set to be installed.                                       |
-|          | kubernetesui/metrics-scraper                                   | v1.0.8           | v1.0.8                       | v1.0.8       | unsupported  | v1.0.8            | v1.0.8    | v1.0.8    | Required only if Kubernetes Dashboard plugin is set to be installed.                                       |
-|          | rancher/local-path-provisioner                                 | v0.0.26          | v0.0.26                      | v0.0.26      | unsupported  | v0.0.26           | v0.0.26   | v0.0.26   | Required only if local-path provisioner plugin is set to be installed.                                   |
-
-## Default Dependent Components Versions for Kubernetes Versions v1.28.12
-| Type     | Name                                                           | Versions         |                              |              |              |                   |           |           | Note                                                                                                       |
-|----------|----------------------------------------------------------------|------------------|------------------------------|--------------|--------------|-------------------|-----------|-----------|------------------------------------------------------------------------------------------------------------|
-|          |                                                                | CentOS RHEL 7.5+ | CentOS RHEL Oracle Linux 8.4 | Ubuntu 20.04,22.04 | Ubuntu 24.04 | Oracle Linux 7.5+ | RHEL 8.6+ | RockyLinux 8.6+ |                                                                                                      |
-| binaries | kubeadm                                                        | v1.28.12          | v1.28.12                      | v1.28.12      | unsupported   | v1.28.12           | v1.28.12   | v1.28.12   | SHA1: 22476176e43fc7d0842ea0339883e7f6736c4626                                                             |
-|          | kubelet                                                        | v1.28.12          | v1.28.12                      | v1.28.12      | unsupported   | v1.28.12           | v1.28.12   | v1.28.12   | SHA1: 03127cf21c2d0dda9b771af9243aedea5a6bdc05                                                            |
-|          | kubectl                                                        | v1.28.12          | v1.28.12                      | v1.28.12      | unsupported   | v1.28.12           | v1.28.12   | v1.28.12   | SHA1: be8da097d394fd4693c1953a463c5896199780ba                                                             |
-|          | calicoctl                                                      | v3.28.1          | v3.28.1                      | v3.28.1      | unsupported  | v3.28.1           | v3.28.1   | v3.28.1   | SHA1: 80f164a8248b8fa501f35f12cbcac0b059e665e2 Required only if calico is installed.                       |
-|          | crictl                                                         | v1.30.0          | v1.30.0                      | v1.30.0      | unsupported  | v1.30.0           | v1.30.0   | v1.30.0   | SHA1: c81e76d5d4bf64d6b513485490722d2fc0a9a83b                                                             |
-| rpms     | containerd.io                                                  | 1.6.*            | 1.6.*                        | 1.6.*        | unsupported  | 1.6.*             | 1.6.*     | 1.6.*     |                                                                                                            |
-|          | haproxy/rh-haproxy                                             | 1.8              | 1.8                          | 2.*          | unsupported  | 1.8               | 1.8       | 1.8       | Required only if balancers are presented in the deployment scheme.                                         |
-|          | keepalived                                                     | 1.3              | 2.1                          | 2.*          | unsupported  | 1.3               | 2.1       | 2.1       | Required only if VRRP is presented in the deployment scheme.                                               |
-| images   | registry.k8s.io/kube-apiserver                                 | v1.28.12          | v1.28.12                      | v1.28.12      | unsupported   | v1.28.12           | v1.28.12   | v1.28.12   |                                                                                                            |
-|          | registry.k8s.io/kube-controller-manager                        | v1.28.12          | v1.28.12                      | v1.28.12      | unsupported   | v1.28.12           | v1.28.12   | v1.28.12   |                                                                                                            |
-|          | registry.k8s.io/kube-proxy                                     | v1.28.12          | v1.28.12                      | v1.28.12      | unsupported   | v1.28.12           | v1.28.12   | v1.28.12   |                                                                                                            |
-|          | registry.k8s.io/kube-scheduler                                 | v1.28.12          | v1.28.12                      | v1.28.12      | unsupported   | v1.28.12           | v1.28.12   | v1.28.12   |                                                                                                            |
-|          | registry.k8s.io/coredns                                        | v1.11.1          | v1.11.1                      | v1.11.1      | unsupported  | v1.11.1           | v1.11.1   | v1.11.1   |                                                                                                            |
-|          | registry.k8s.io/pause                                          | 3.9              | 3.9                          | 3.9          | unsupported  | 3.9               | 3.9       | 3.9       |                                                                                                            |
-|          | registry.k8s.io/etcd                                           | 3.5.12-0         | 3.5.12-0                     | 3.5.12-0     | unsupported  | 3.5.12-0          | 3.5.12-0  | 3.5.12-0  |                                                                                                            |
-|          | calico/typha                                                   | v3.28.1          | v3.28.1                      | v3.28.1      | unsupported  | v3.28.1           | v3.28.1   | v3.28.1   | Required only if Typha is enabled in Calico config.                                                        |
-|          | calico/cni                                                     | v3.28.1          | v3.28.1                      | v3.28.1      | unsupported | v3.28.1           | v3.28.1   | v3.28.1   |                                                                                                            |
-|          | calico/node                                                    | v3.28.1          | v3.28.1                      | v3.28.1      | unsupported  | v3.28.1           | v3.28.1   | v3.28.1   |                                                                                                            |
-|          | calico/kube-controllers                                        | v3.28.1          | v3.28.1                      | v3.28.1      | unsupported  | v3.28.1           | v3.28.1   | v3.28.1   |                                                                                                            |
-|          | calico/apiserver                                               | v3.28.1          | v3.28.1                      | v3.28.1      | unsupported  | v3.28.1           | v3.28.1   | v3.28.1   | Required only if API server is enabled in Calico config.                                                   |
-|          | registry.k8s.io/ingress-nginx/controller                       | v1.11.1          | v1.11.1                      | v1.11.1      | unuspported  | v1.11.1           | v1.11.1   | v1.11.1   |                                                                                                            |
-|          | registry.k8s.io/kube-webhook-certgen                           | v1.4.1           | v1.4.1                       | v1.4.1       | unsupported  | v1.4.1            | v1.4.1    | v1.4.1    |                                                                                                            |
-|          | kubernetesui/dashboard                                         | v2.7.0           | v2.7.0                       | v2.7.0       | unsupported  | v2.7.0            | v2.7.0    | v2.7.0    | Required only if Kubernetes Dashboard plugin is set to be installed.                                       |
-|          | kubernetesui/metrics-scraper                                   | v1.0.8           | v1.0.8                       | v1.0.8       | unsupported  | v1.0.8            | v1.0.8    | v1.0.8    | Required only if Kubernetes Dashboard plugin is set to be installed.                                       |
-|          | rancher/local-path-provisioner                                 | v0.0.27          | v0.0.27                      | v0.0.27      | unsupported  | v0.0.27           | v0.0.27   | v0.0.27   | Required only if local-path provisioner plugin is set to be installed.                                   |   
-
-## Default Dependent Components Versions for Kubernetes Versions v1.29.7
-| Type     | Name                                                           | Versions         |                              |              |              |                   |           |           | Note                                                                                                       |
-|----------|----------------------------------------------------------------|------------------|------------------------------|--------------|--------------|-------------------|-----------|-----------|------------------------------------------------------------------------------------------------------------|
-|          |                                                                | CentOS RHEL 7.5+ | CentOS RHEL Oracle Linux 8.4 | Ubuntu 20.04,22.04 | Ubuntu 24.04 | Oracle Linux 7.5+ | RHEL 8.6+ | RockyLinux 8.6+ |                                                                                                      |
-| binaries | kubeadm                                                        | v1.29.7          | v1.29.7                      | v1.29.7      | v1.29.7      | v1.29.7           | v1.29.7   | v1.29.7   | SHA1: 1c3204a3ba2139e65dc6353da8cc23d5c2d4c449                                                             |
-|          | kubelet                                                        | v1.29.7          | v1.29.7                      | v1.29.7      | v1.29.7      | v1.29.7           | v1.29.7   | v1.29.7   | SHA1: a8be6dadd57062577102ddcad029f7b23a5ce925                                                            |
-|          | kubectl                                                        | v1.29.7          | v1.29.7                      | v1.29.7      | v1.29.7      | v1.29.7           | v1.29.7   | v1.29.7   | SHA1: 6be79225976da1bdbbafc2f63118263fc35f224f                                                             |
-|          | calicoctl                                                      | v3.28.1          | v3.28.1                      | v3.28.1      | v3.28.1      | v3.28.1           | v3.28.1   | v3.28.1   | SHA1: 80f164a8248b8fa501f35f12cbcac0b059e665e2 Required only if calico is installed.                       |
-|          | crictl                                                         | v1.30.0          | v1.30.0                      | v1.30.0      | v1.30.0      | v1.30.0           | v1.30.0   | v1.30.0   | SHA1: c81e76d5d4bf64d6b513485490722d2fc0a9a83b                                                             |
-| rpms     | containerd.io                                                  | 1.6.*            | 1.6.*                        | 1.7.*        | 1.7.*        | 1.6.*             | 1.6.*     | 1.6.*     |                                                                                                            |
-|          | haproxy/rh-haproxy                                             | 1.8              | 1.8                          | 2.*          | 2.*          | 1.8               | 1.8       | 1.8       | Required only if balancers are presented in the deployment scheme.                                         |
+| binaries | kubeadm                                                        | v1.31.6          | v1.31.6                      | v1.31.6      | v1.31.6      | v1.31.6           | v1.31.6   | v1.31.6   | SHA1: 01b061a1a828bca9986f532f086a2bf89879e87e          |
+|          | kubelet                                                        | v1.31.6          | v1.31.6                      | v1.31.6      | v1.31.6      | v1.31.6           | v1.31.6   | v1.31.6   | SHA1: 9c0cd5bf9f36a159d3d72a8241d743500c116cf5          |
+|          | kubectl                                                        | v1.31.6          | v1.31.6                      | v1.31.6      | v1.31.6      | v1.31.6           | v1.31.6   | v1.31.6   | SHA1: af8b272a4d21d427d502ce24d737ffe2d6fc2164          |
+|          | calicoctl                                                      | v3.29.4          | v3.29.4                      | v3.29.4      | v3.29.4      | v3.29.4           | v3.29.4   | v3.29.4   | SHA1: 00be749d257eee5035d3ba408aca15fcaf8be7c2 Required only if calico is installed.                       |
+|          | crictl                                                         | v1.30.0          | v1.30.0                      | v1.30.0      | v1.30.0      | v1.30.0           | v1.30.0   | v1.30.0   | SHA1: c81e76d5d4bf64d6b513485490722d2fc0a9a83b          |
+| rpms     | containerd.io                                                  | 1.6.*            | 1.6.*                        | 1.7.*        | 1.7.*        | 1.6.*             | 1.6.*     | 1.6.*     |                                                         |
+|          | haproxy/rh-haproxy                                             | 1.8              | 1.8                          | 2.*          | 2.*          | 1.8               | 1.8       | 1.8       | Required only if balancers are presented in the deployment scheme.| 
 |          | keepalived                                                     | 1.3              | 2.1                          | 2.*          | 2.*          | 1.3               | 2.1       | 2.1       | Required only if VRRP is presented in the deployment scheme.                                               |
-| images   | registry.k8s.io/kube-apiserver                                 | v1.29.7          | v1.29.7                      | v1.29.7      | v1.29.7      | v1.29.7           | v1.29.7   | v1.29.7   |                                                                                                            |
-|          | registry.k8s.io/kube-controller-manager                        | v1.29.7          | v1.29.7                      | v1.29.7      | v1.29.7      | v1.29.7           | v1.29.7   | v1.29.7   |                                                                                                            |
-|          | registry.k8s.io/kube-proxy                                     | v1.29.7          | v1.29.7                      | v1.29.7      | v1.29.7      | v1.29.7           | v1.29.7   | v1.29.7   |                                                                                                            |
-|          | registry.k8s.io/kube-scheduler                                 | v1.29.7          | v1.29.7                      | v1.29.7      | v1.29.7      | v1.29.7           | v1.29.7   | v1.29.7   |                                                                                                            |
-|          | registry.k8s.io/coredns                                        | v1.11.1          | v1.11.1                      | v1.11.1      | v1.11.1      | v1.11.1           | v1.11.1   | v1.11.1   |                                                                                                            |
-|          | registry.k8s.io/pause                                          | 3.9              | 3.9                          | 3.9          | 3.9          | 3.9               | 3.9       | 3.9       |                                                                                                            |
-|          | registry.k8s.io/etcd                                           | 3.5.12-0         | 3.5.12-0                     | 3.5.12-0     | 3.5.12-0     | 3.5.12-0          | 3.5.12-0  | 3.5.12-0  |                                                                                                            |
-|          | calico/typha                                                   | v3.28.1          | v3.28.1                      | v3.28.1      | v3.28.1      | v3.28.1           | v3.28.1   | v3.28.1   | Required only if Typha is enabled in Calico config.                                                        |
-|          | calico/cni                                                     | v3.28.1          | v3.28.1                      | v3.28.1      | v3.28.1      | v3.28.1           | v3.28.1   | v3.28.1   |                                                                                                            |
-|          | calico/node                                                    | v3.28.1          | v3.28.1                      | v3.28.1      | v3.28.1      | v3.28.1           | v3.28.1   | v3.28.1   |                                                                                                            |
-|          | calico/kube-controllers                                        | v3.28.1          | v3.28.1                      | v3.28.1      | v3.28.1      | v3.28.1           | v3.28.1   | v3.28.1   |                                                                                                            |
-|          | calico/apiserver                                               | v3.28.1          | v3.28.1                      | v3.28.1      | v3.28.1      | v3.28.1           | v3.28.1   | v3.28.1   | Required only if API server is enabled in Calico config.                                                   |
-|          | registry.k8s.io/ingress-nginx/controller                       | v1.11.1          | v1.11.1                      | v1.11.1      | v1.11.1      | v1.11.1           | v1.11.1   | v1.11.1   |                                                                                                            |
-|          | registry.k8s.io/kube-webhook-certgen                           | v1.4.1           | v1.4.1                       | v1.4.1       | v1.4.1       | v1.4.1            | v1.4.1    | v1.4.1    |                                                                                                            |
-|          | kubernetesui/dashboard                                         | v2.7.0           | v2.7.0                       | v2.7.0       | v2.7.0       | v2.7.0            | v2.7.0    | v2.7.0    | Required only if Kubernetes Dashboard plugin is set to be installed.                                       |
-|          | kubernetesui/metrics-scraper                                   | v1.0.8           | v1.0.8                       | v1.0.8       | v1.0.8       | v1.0.8            | v1.0.8    | v1.0.8    | Required only if Kubernetes Dashboard plugin is set to be installed.                                       |
-|          | rancher/local-path-provisioner                                 | v0.0.27          | v0.0.27                      | v0.0.27      | v0.0.27      | v0.0.27           | v0.0.27   | v0.0.27   | Required only if local-path provisioner plugin is set to be installed.                                   |   
+| images   | registry.k8s.io/kube-apiserver                                 | v1.31.6          | v1.31.6                      | v1.31.6      | v1.31.6      | v1.31.6           | v1.31.6   | v1.31.6   |                                                         |
+|          | registry.k8s.io/kube-controller-manager                        | v1.31.6          | v1.31.6                      | v1.31.6      | v1.31.6      | v1.31.6           | v1.31.6   | v1.31.6   |                                                         |
+|          | registry.k8s.io/kube-proxy                                     | v1.31.6          | v1.31.6                      | v1.31.6      | v1.31.6      | v1.31.6           | v1.31.6   | v1.31.6   |                                                         |
+|          | registry.k8s.io/kube-scheduler                                 | v1.31.6          | v1.31.6                      | v1.31.6      | v1.31.6      | v1.31.6           | v1.31.6   | v1.31.6   |                                                         |
+|          | registry.k8s.io/coredns                                        | v1.11.3          | v1.11.3                      | v1.11.3      | v1.11.3      | v1.11.3           | v1.11.3   | v1.11.3   |                                                         |
+|          | registry.k8s.io/pause                                          | 3.10             | 3.10                         | 3.10         | 3.10         | 3.10              | 3.10      | 3.10      |                                                         |
+|          | registry.k8s.io/etcd                                           | 3.5.15-0         | 3.5.15-0                     | 3.5.15-0     | 3.5.15-0     | 3.5.15-0          | 3.5.15-0  | 3.5.15-0  |                                                         |
+|          | calico/typha                                                   | v3.29.4          | v3.29.4                      | v3.29.4      | v3.29.4      | v3.29.4           | v3.29.4   | v3.29.4   | Required only if Typha is enabled in Calico config.     |
+|          | calico/cni                                                     | v3.29.4          | v3.29.4                      | v3.29.4      | v3.29.4      | v3.29.4           | v3.29.4   | v3.29.4   |                                                         |
+|          | calico/node                                                    | v3.29.4          | v3.29.4                      | v3.29.4      | v3.29.4      | v3.29.4           | v3.29.4   | v3.29.4   |                                                         |
+|          | calico/kube-controllers                                        | v3.29.4          | v3.29.4                      | v3.29.4      | v3.29.4      | v3.29.4           | v3.29.4   | v3.29.4   |                                                         |
+|          | calico/apiserver                                               | v3.29.4          | v3.29.4                      | v3.29.4      | v3.29.4      | v3.29.4           | v3.29.4   | v3.29.4   | Required only if API server is enabled in Calico config.|
+|          | registry.k8s.io/ingress-nginx/controller                       | v1.12.4          | v1.12.4                      | v1.12.4      | v1.12.4      | v1.12.4           | v1.12.4   | v1.12.4   |                                                         |
+|          | registry.k8s.io/kube-webhook-certgen                           | v1.6.0           | v1.6.0                       | v1.6.0       | v1.6.0       | v1.6.0            | v1.6.0    | v1.6.0    |                                                         |
+|          | kubernetesui/dashboard                                         | v2.7.0           | v2.7.0                       | v2.7.0       | v2.7.0       | v2.7.0            | v2.7.0    | v2.7.0    | Required only if Kubernetes Dashboard plugin is set to be installed. |
+|          | kubernetesui/metrics-scraper                                   | v1.0.8           | v1.0.8                       | v1.0.8       | v1.0.8       | v1.0.8            | v1.0.8    | v1.0.8    | Required only if Kubernetes Dashboard plugin is set to be installed. |
+|          | rancher/local-path-provisioner                                 | v0.0.27          | v0.0.27                      | v0.0.27      | v0.0.27      | v0.0.27           | v0.0.27   | v0.0.27   | Required only if local-path provisioner plugin is set to be installed. |   
 
-## Default Dependent Components Versions for Kubernetes Versions v1.30.3
+
+## Default Dependent Components Versions for Kubernetes Versions v1.32.2
 | Type     | Name                                                           | Versions         |                              |              |              |                   |           |           | Note                                                                                                       |
 |----------|----------------------------------------------------------------|------------------|------------------------------|--------------|--------------|-------------------|-----------|-----------|------------------------------------------------------------------------------------------------------------|
 |          |                                                                | CentOS RHEL 7.5+ | CentOS RHEL Oracle Linux 8.4 | Ubuntu 20.04,22.04 | Ubuntu 24.04 | Oracle Linux 7.5+ | RHEL 8.6+ | RockyLinux 8.6+ |                                                                                                      |
-| binaries | kubeadm                                                        | v1.30.3          | v1.30.3                      | v1.30.3      | v1.30.3      | v1.30.3           | v1.30.3   | v1.30.3   | SHA1: f840e75f5dc1001ebdd7e286c0e87e1090df011b                                                             |
-|          | kubelet                                                        | v1.30.3          | v1.30.3                      | v1.30.3      | v1.30.3      | v1.30.3           | v1.30.3   | v1.30.3   | SHA1: fbae53efc43ec715a45b05415294ab991ea087a2                                                            |
-|          | kubectl                                                        | v1.30.3          | v1.30.3                      | v1.30.3      | v1.30.3      | v1.30.3           | v1.30.3   | v1.30.3   | SHA1: 097d6b02fabb284418a9c95ea81fa86fc3c85bb7                                                             |
-|          | calicoctl                                                      | v3.28.1          | v3.28.1                      | v3.28.1      | v3.28.1      | v3.28.1           | v3.28.1   | v3.28.1   | SHA1: 80f164a8248b8fa501f35f12cbcac0b059e665e2 Required only if calico is installed.                       |
-|          | crictl                                                         | v1.30.0          | v1.30.0                      | v1.30.0      | v1.30.0      | v1.30.0           | v1.30.0   | v1.30.0   | SHA1: c81e76d5d4bf64d6b513485490722d2fc0a9a83b                                                             |
-| rpms     | containerd.io                                                  | 1.6.*            | 1.6.*                        | 1.7.*        | 1.7.*        | 1.6.*             | 1.6.*     | 1.6.*     |                                                                                                            |
-|          | haproxy/rh-haproxy                                             | 1.8              | 1.8                          | 2.*          | 2.*          | 1.8               | 1.8       | 1.8       | Required only if balancers are presented in the deployment scheme.                                         |
-|          | keepalived                                                     | 1.3              | 2.1                          | 2.*          | 2.*          | 1.3               | 2.1       | 2.1       | Required only if VRRP is presented in the deployment scheme.                                               |
-| images   | registry.k8s.io/kube-apiserver                                 | v1.30.3          | v1.30.3                      | v1.30.3      | v1.30.3      | v1.30.3           | v1.30.3   | v1.30.3   |                                                                                                            |
-|          | registry.k8s.io/kube-controller-manager                        | v1.30.3          | v1.30.3                      | v1.30.3      | v1.30.3      | v1.30.3           | v1.30.3   | v1.30.3   |                                                                                                            |
-|          | registry.k8s.io/kube-proxy                                     | v1.30.3          | v1.30.3                      | v1.30.3      | v1.30.3      | v1.30.3           | v1.30.3   | v1.30.3   |                                                                                                            |
-|          | registry.k8s.io/kube-scheduler                                 | v1.30.3          | v1.30.3                      | v1.30.3      | v1.30.3      | v1.30.3           | v1.30.3   | v1.30.3   |                                                                                                            |
-|          | registry.k8s.io/coredns                                        | v1.11.1          | v1.11.1                      | v1.11.1      | v1.11.1      | v1.11.1           | v1.11.1   | v1.11.1   |                                                                                                            |
-|          | registry.k8s.io/pause                                          | 3.9              | 3.9                          | 3.9          | 3.9          | 3.9               | 3.9       | 3.9       |                                                                                                            |
-|          | registry.k8s.io/etcd                                           | 3.5.12-0         | 3.5.12-0                     | 3.5.12-0     | 3.5.12-0     | 3.5.12-0          | 3.5.12-0  | 3.5.12-0  |                                                                                                            |
-|          | calico/typha                                                   | v3.28.1          | v3.28.1                      | v3.28.1      | v3.28.1      | v3.28.1           | v3.28.1   | v3.28.1   | Required only if Typha is enabled in Calico config.                                                        |
-|          | calico/cni                                                     | v3.28.1          | v3.28.1                      | v3.28.1      | v3.28.1      | v3.28.1           | v3.28.1   | v3.28.1   |                                                                                                            |
-|          | calico/node                                                    | v3.28.1          | v3.28.1                      | v3.28.1      | v3.28.1      | v3.28.1           | v3.28.1   | v3.28.1   |                                                                                                            |
-|          | calico/kube-controllers                                        | v3.28.1          | v3.28.1                      | v3.28.1      | v3.28.1      | v3.28.1           | v3.28.1   | v3.28.1   |                                                                                                            |
-|          | calico/apiserver                                               | v3.28.1          | v3.28.1                      | v3.28.1      | v3.28.1      | v3.28.1           | v3.28.1   | v3.28.1   | Required only if API server is enabled in Calico config.                                                   |
-|          | registry.k8s.io/ingress-nginx/controller                       | v1.11.1          | v1.11.1                      | v1.11.1      | v1.11.1      | v1.11.1           | v1.11.1   | v1.11.1   |                                                                                                            |
-|          | registry.k8s.io/kube-webhook-certgen                           | v1.4.1           | v1.4.1                       | v1.4.1       | v1.4.1       | v1.4.1            | v1.4.1    | v1.4.1    |                                                                                                            |
-|          | kubernetesui/dashboard                                         | v2.7.0           | v2.7.0                       | v2.7.0       | v2.7.0       | v2.7.0            | v2.7.0    | v2.7.0    | Required only if Kubernetes Dashboard plugin is set to be installed.                                       |
-|          | kubernetesui/metrics-scraper                                   | v1.0.8           | v1.0.8                       | v1.0.8       | v1.0.8       | v1.0.8            | v1.0.8    | v1.0.8    | Required only if Kubernetes Dashboard plugin is set to be installed.                                       |
-|          | rancher/local-path-provisioner                                 | v0.0.27          | v0.0.27                      | v0.0.27      | v0.0.27      | v0.0.27           | v0.0.27   | v0.0.27   | Required only if local-path provisioner plugin is set to be installed.                                   |   
+| binaries | kubeadm                                                        | v1.32.2          | v1.32.2                      | v1.32.2      | v1.32.2      | v1.32.2           | v1.32.2   | v1.32.2   | SHA1: 7aef86d97edf97e50ac7112a4ada49fe74619ebc          |
+|          | kubelet                                                        | v1.32.2          | v1.32.2                      | v1.32.2      | v1.32.2      | v1.32.2           | v1.32.2   | v1.32.2   | SHA1: 9d8446943a6aab092156b7ee0a6d74c27f742ffc          |
+|          | kubectl                                                        | v1.32.2          | v1.32.2                      | v1.32.2      | v1.32.2      | v1.32.2           | v1.32.2   | v1.32.2   | SHA1: 87e59e4ae4a6b99d3ee8c37dea2db6b3466b41bc          |
+|          | calicoctl                                                      | v3.29.4          | v3.29.4                      | v3.29.4      | v3.29.4      | v3.29.4           | v3.29.4   | v3.29.4   | SHA1: 00be749d257eee5035d3ba408aca15fcaf8be7c2 Required only if calico is installed.  |
+|          | crictl                                                         | v1.32.0          | v1.32.0                      | v1.32.0      | v1.32.0      | v1.32.0           | v1.32.0   | v1.32.0   | SHA1: c503051cf6e809a691f776ddf544abfc2a15e790          |
+| rpms     | containerd.io                                                  | 1.6.*            | 1.6.*                        | 1.7.*        | 1.7.*        | 1.6.*             | 1.6.*     | 1.6.*     |                                                         |
+|          | haproxy/rh-haproxy                                             | 1.8              | 1.8                          | 2.*          | 2.*          | 1.8               | 1.8       | 1.8       | Required only if balancers are presented in the deployment scheme.    |
+|          | keepalived                                                     | 1.3              | 2.1                          | 2.*          | 2.*          | 1.3               | 2.1       | 2.1       | Required only if VRRP is presented in the deployment scheme.    |
+| images   | registry.k8s.io/kube-apiserver                                 | v1.32.2          | v1.32.2                      | v1.32.2      | v1.32.2      | v1.32.2           | v1.32.2   | v1.32.2   |                                                         |
+|          | registry.k8s.io/kube-controller-manager                        | v1.32.2          | v1.32.2                      | v1.32.2      | v1.32.2      | v1.32.2           | v1.32.2   | v1.32.2   |                                                         |
+|          | registry.k8s.io/kube-proxy                                     | v1.32.2          | v1.32.2                      | v1.32.2      | v1.32.2      | v1.32.2           | v1.32.2   | v1.32.2   |                                                         |
+|          | registry.k8s.io/kube-scheduler                                 | v1.32.2          | v1.32.2                      | v1.32.2      | v1.32.2      | v1.32.2           | v1.32.2   | v1.32.2   |                                                         |
+|          | registry.k8s.io/coredns                                        | v1.11.3          | v1.11.3                      | v1.11.3      | v1.11.3      | v1.11.3           | v1.11.3   | v1.11.3   |                                                         |
+|          | registry.k8s.io/pause                                          | 3.10             | 3.10                         | 3.10         | 3.10         | 3.10              | 3.10      | 3.10      |                                                         |
+|          | registry.k8s.io/etcd                                           | 3.5.16-0         | 3.5.16-0                     | 3.5.16-0     | 3.5.16-0     | 3.5.16-0          | 3.5.16-0  | 3.5.16-0  |                                                         |
+|          | calico/typha                                                   | v3.29.4          | v3.29.4                      | v3.29.4      | v3.29.4      | v3.29.4           | v3.29.4   | v3.29.4   | Required only if Typha is enabled in Calico config.     |
+|          | calico/cni                                                     | v3.29.4          | v3.29.4                      | v3.29.4      | v3.29.4      | v3.29.4           | v3.29.4   | v3.29.4   |                                                         |
+|          | calico/node                                                    | v3.29.4          | v3.29.4                      | v3.29.4      | v3.29.4      | v3.29.4           | v3.29.4   | v3.29.4   |                                                         |
+|          | calico/kube-controllers                                        | v3.29.4          | v3.29.4                      | v3.29.4      | v3.29.4      | v3.29.4           | v3.29.4   | v3.29.4   |                                                         |
+|          | calico/apiserver                                               | v3.29.4          | v3.29.4                      | v3.29.4      | v3.29.4      | v3.29.4           | v3.29.4   | v3.29.4   | Required only if API server is enabled in Calico config.|
+|          | registry.k8s.io/ingress-nginx/controller                       | v1.12.4          | v1.12.4                      | v1.12.4      | v1.12.4      | v1.12.4           | v1.12.4   | v1.12.4   |                                                         |
+|          | registry.k8s.io/kube-webhook-certgen                           | v1.6.0           | v1.6.0                       | v1.6.0       | v1.6.0       | v1.6.0            | v1.6.0    | v1.6.0    |                                                         |
+|          | kubernetesui/dashboard                                         | v2.7.0           | v2.7.0                       | v2.7.0       | v2.7.0       | v2.7.0            | v2.7.0    | v2.7.0    | Required only if Kubernetes Dashboard plugin is set to be installed. |
+|          | kubernetesui/metrics-scraper                                   | v1.0.8           | v1.0.8                       | v1.0.8       | v1.0.8       | v1.0.8            | v1.0.8    | v1.0.8    | Required only if Kubernetes Dashboard plugin is set to be installed. |
+|          | rancher/local-path-provisioner                                 | v0.0.27          | v0.0.27                      | v0.0.27      | v0.0.27      | v0.0.27           | v0.0.27   | v0.0.27   | Required only if local-path provisioner plugin is set to be installed. |   
 
-## Default Dependent Components Versions for Kubernetes Versions v1.31.1
+
+## Default Dependent Components Versions for Kubernetes Versions v1.33.0
 | Type     | Name                                                           | Versions         |                              |              |              |                   |           |           | Note                                                                                                       |
 |----------|----------------------------------------------------------------|------------------|------------------------------|--------------|--------------|-------------------|-----------|-----------|------------------------------------------------------------------------------------------------------------|
 |          |                                                                | CentOS RHEL 7.5+ | CentOS RHEL Oracle Linux 8.4 | Ubuntu 20.04,22.04 | Ubuntu 24.04 | Oracle Linux 7.5+ | RHEL 8.6+ | RockyLinux 8.6+ |                                                                                                      |
-| binaries | kubeadm                                                        | v1.31.1          | v1.31.1                      | v1.31.1      | v1.31.1      | v1.31.1           | v1.31.1   | v1.31.1   | SHA1: 0a682af6436ce4e7188f93ddeebff5c2f3be1592                                                             |
-|          | kubelet                                                        | v1.31.1          | v1.31.1                      | v1.31.1      | v1.31.1      | v1.31.1           | v1.31.1   | v1.31.1   | SHA1: fc7d0a9859c97ec2a2a4ac9ec1814b131e8d875f                                                            |
-|          | kubectl                                                        | v1.31.1          | v1.31.1                      | v1.31.1      | v1.31.1      | v1.31.1           | v1.31.1   | v1.31.1   | SHA1: a0fd9dc942f533e2bdeaa4b2691fc408e334f922                                                             |
-|          | calicoctl                                                      | v3.28.1          | v3.28.1                      | v3.28.1      | v3.28.1      | v3.28.1           | v3.28.1   | v3.28.1   | SHA1: 80f164a8248b8fa501f35f12cbcac0b059e665e2 Required only if calico is installed.                       |
-|          | crictl                                                         | v1.30.0          | v1.30.0                      | v1.30.0      | v1.30.0      | v1.30.0           | v1.30.0   | v1.30.0   | SHA1: c81e76d5d4bf64d6b513485490722d2fc0a9a83b                                                             |
-| rpms     | containerd.io                                                  | 1.6.*            | 1.6.*                        | 1.7.*        | 1.7.*        | 1.6.*             | 1.6.*     | 1.6.*     |                                                                                                            |
-|          | haproxy/rh-haproxy                                             | 1.8              | 1.8                          | 2.*          | 2.*          | 1.8               | 1.8       | 1.8       | Required only if balancers are presented in the deployment scheme.                                         |
-|          | keepalived                                                     | 1.3              | 2.1                          | 2.*          | 2.*          | 1.3               | 2.1       | 2.1       | Required only if VRRP is presented in the deployment scheme.                                               |
-| images   | registry.k8s.io/kube-apiserver                                 | v1.31.1          | v1.31.1                      | v1.31.1      | v1.31.1      | v1.31.1           | v1.31.1   | v1.31.1   |                                                                                                            |
-|          | registry.k8s.io/kube-controller-manager                        | v1.31.1          | v1.31.1                      | v1.31.1      | v1.31.1      | v1.31.1           | v1.31.1   | v1.31.1   |                                                                                                            |
-|          | registry.k8s.io/kube-proxy                                     | v1.31.1          | v1.31.1                      | v1.31.1      | v1.31.1      | v1.31.1           | v1.31.1   | v1.31.1   |                                                                                                            |
-|          | registry.k8s.io/kube-scheduler                                 | v1.31.1          | v1.31.1                      | v1.31.1      | v1.31.1      | v1.31.1           | v1.31.1   | v1.31.1   |                                                                                                            |
-|          | registry.k8s.io/coredns                                        | v1.11.1          | v1.11.1                      | v1.11.1      | v1.11.1      | v1.11.1           | v1.11.1   | v1.11.1   |                                                                                                            |
-|          | registry.k8s.io/pause                                          | 3.10             | 3.10                         | 3.10         | 3.10         | 3.10              | 3.10      | 3.10      |                                                                                                            |
-|          | registry.k8s.io/etcd                                           | 3.5.15-0         | 3.5.15-0                     | 3.5.15-0     | 3.5.15-0     | 3.5.15-0          | 3.5.15-0  | 3.5.15-0  |                                                                                                            |
-|          | calico/typha                                                   | v3.28.1          | v3.28.1                      | v3.28.1      | v3.28.1      | v3.28.1           | v3.28.1   | v3.28.1   | Required only if Typha is enabled in Calico config.                                                        |
-|          | calico/cni                                                     | v3.28.1          | v3.28.1                      | v3.28.1      | v3.28.1      | v3.28.1           | v3.28.1   | v3.28.1   |                                                                                                            |
-|          | calico/node                                                    | v3.28.1          | v3.28.1                      | v3.28.1      | v3.28.1      | v3.28.1           | v3.28.1   | v3.28.1   |                                                                                                            |
-|          | calico/kube-controllers                                        | v3.28.1          | v3.28.1                      | v3.28.1      | v3.28.1      | v3.28.1           | v3.28.1   | v3.28.1   |                                                                                                            |
-|          | calico/apiserver                                               | v3.28.1          | v3.28.1                      | v3.28.1      | v3.28.1      | v3.28.1           | v3.28.1   | v3.28.1   | Required only if API server is enabled in Calico config.                                                   |
-|          | registry.k8s.io/ingress-nginx/controller                       | v1.11.1          | v1.11.1                      | v1.11.1      | v1.11.1      | v1.11.1           | v1.11.1   | v1.11.1   |                                                                                                            |
-|          | registry.k8s.io/kube-webhook-certgen                           | v1.4.1           | v1.4.1                       | v1.4.1       | v1.4.1       | v1.4.1            | v1.4.1    | v1.4.1    |                                                                                                            |
-|          | kubernetesui/dashboard                                         | v2.7.0           | v2.7.0                       | v2.7.0       | v2.7.0       | v2.7.0            | v2.7.0    | v2.7.0    | Required only if Kubernetes Dashboard plugin is set to be installed.                                       |
-|          | kubernetesui/metrics-scraper                                   | v1.0.8           | v1.0.8                       | v1.0.8       | v1.0.8       | v1.0.8            | v1.0.8    | v1.0.8    | Required only if Kubernetes Dashboard plugin is set to be installed.                                       |
-|          | rancher/local-path-provisioner                                 | v0.0.27          | v0.0.27                      | v0.0.27      | v0.0.27      | v0.0.27           | v0.0.27   | v0.0.27   | Required only if local-path provisioner plugin is set to be installed.                                   |   
+| binaries | kubeadm                                                        | v1.33.0          | v1.33.0                      | v1.33.0      | v1.33.0      | v1.33.0           | v1.33.0   | v1.33.0   | SHA1: bc411a208e067c63976eeecf02d1bf5c5c823bff          |
+|          | kubelet                                                        | v1.33.0          | v1.33.0                      | v1.33.0      | v1.33.0      | v1.33.0           | v1.33.0   | v1.33.0   | SHA1: 984fc4e063e8df34f4beaa9212e5429ee70e5997          |
+|          | kubectl                                                        | v1.33.0          | v1.33.0                      | v1.33.0      | v1.33.0      | v1.33.0           | v1.33.0   | v1.33.0   | SHA1: aab40d38db50c728dbbe2e7b8144ba18f93480c2          |
+|          | calicoctl                                                      | v3.29.4          | v3.29.4                      | v3.29.4      | v3.29.4      | v3.29.4           | v3.29.4   | v3.29.4   | SHA1: 00be749d257eee5035d3ba408aca15fcaf8be7c2 Required only if calico is installed. |
+|          | crictl                                                         | v1.33.0          | v1.33.0                      | v1.33.0      | v1.33.0      | v1.33.0           | v1.33.0   | v1.33.0   | SHA1: d702fd5792aba3ebf451e4488df2916010a76a0d          |
+| rpms     | containerd.io                                                  | 1.6.*            | 1.6.*                        | 1.7.*        | 1.7.*        | 1.6.*             | 1.6.*     | 1.6.*     |                                                         |
+|          | haproxy/rh-haproxy                                             | 1.8              | 1.8                          | 2.*          | 2.*          | 1.8               | 1.8       | 1.8       | Required only if balancers are presented in the deployment scheme.    |
+|          | keepalived                                                     | 1.3              | 2.1                          | 2.*          | 2.*          | 1.3               | 2.1       | 2.1       | Required only if VRRP is presented in the deployment scheme.    |
+| images   | registry.k8s.io/kube-apiserver                                 | v1.33.0          | v1.33.0                      | v1.33.0      | v1.33.0      | v1.33.0           | v1.33.0   | v1.33.0   |                                                         |
+|          | registry.k8s.io/kube-controller-manager                        | v1.33.0          | v1.33.0                      | v1.33.0      | v1.33.0      | v1.33.0           | v1.33.0   | v1.33.0   |                                                         |
+|          | registry.k8s.io/kube-proxy                                     | v1.33.0          | v1.33.0                      | v1.33.0      | v1.33.0      | v1.33.0           | v1.33.0   | v1.33.0   |                                                         |
+|          | registry.k8s.io/kube-scheduler                                 | v1.33.0          | v1.33.0                      | v1.33.0      | v1.33.0      | v1.33.0           | v1.33.0   | v1.33.0   |                                                         |
+|          | registry.k8s.io/coredns                                        | v1.12.0          | v1.12.0                      | v1.12.0      | v1.12.0      | v1.12.0           | v1.12.0   | v1.12.0   |                                                         |
+|          | registry.k8s.io/pause                                          | 3.10             | 3.10                         | 3.10         | 3.10         | 3.10              | 3.10      | 3.10      |                                                         |
+|          | registry.k8s.io/etcd                                           | 3.5.21-0         | 3.5.21-0                     | 3.5.21-0     | 3.5.21-0     | 3.5.21-0          | 3.5.21-0  | 3.5.21-0  |                                                         |
+|          | calico/typha                                                   | v3.29.4          | v3.29.4                      | v3.29.4      | v3.29.4      | v3.29.4           | v3.29.4   | v3.29.4   | Required only if Typha is enabled in Calico config.     |
+|          | calico/cni                                                     | v3.29.4          | v3.29.4                      | v3.29.4      | v3.29.4      | v3.29.4           | v3.29.4   | v3.29.4   |                                                         |
+|          | calico/node                                                    | v3.29.4          | v3.29.4                      | v3.29.4      | v3.29.4      | v3.29.4           | v3.29.4   | v3.29.4   |                                                         |
+|          | calico/kube-controllers                                        | v3.29.4          | v3.29.4                      | v3.29.4      | v3.29.4      | v3.29.4           | v3.29.4   | v3.29.4   |                                                         |
+|          | calico/apiserver                                               | v3.29.4          | v3.29.4                      | v3.29.4      | v3.29.4      | v3.29.4           | v3.29.4   | v3.29.4   | Required only if API server is enabled in Calico config.|
+|          | registry.k8s.io/ingress-nginx/controller                       | v1.13.0          | v1.13.0                      | v1.13.0      | v1.13.0      | v1.13.0           | v1.13.0   | v1.13.0   |                                                         |
+|          | registry.k8s.io/kube-webhook-certgen                           | v1.6.0           | v1.6.0                       | v1.6.0       | v1.6.0       | v1.6.0            | v1.6.0    | v1.6.0    |                                                         |
+|          | kubernetesui/dashboard                                         | v2.7.0           | v2.7.0                       | v2.7.0       | v2.7.0       | v2.7.0            | v2.7.0    | v2.7.0    | Required only if Kubernetes Dashboard plugin is set to be installed. |
+|          | kubernetesui/metrics-scraper                                   | v1.0.8           | v1.0.8                       | v1.0.8       | v1.0.8       | v1.0.8            | v1.0.8    | v1.0.8    | Required only if Kubernetes Dashboard plugin is set to be installed. |
+|          | rancher/local-path-provisioner                                 | v0.0.31          | v0.0.31                      | v0.0.31      | v0.0.31      | v0.0.31           | v0.0.31   | v0.0.31   | Required only if local-path provisioner plugin is set to be installed. |   

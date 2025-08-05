@@ -1,5 +1,6 @@
-
+<!-- #GFCFilterMarkerStart# -->
 # Kubemarine and Kubernetes Troubleshooting Guide
+<!-- #GFCFilterMarkerEnd# -->
 
 This section provides troubleshooting information for Kubemarine and Kubernetes solutions.
 
@@ -9,6 +10,14 @@ This section provides troubleshooting information for Kubemarine and Kubernetes 
     - [Command did not complete within a number of seconds](#command-did-not-complete-within-a-number-of-seconds)
   - [KME0004: There are no control planes defined in the cluster scheme](#kme0004-there-are-no-control-planes-defined-in-the-cluster-scheme)
   - [KME0005: {hostnames} are not sudoers](#kme0005-hostnames-are-not-sudoers)
+  - [KME0006: Node Accessibility Issues](#kme0006-node-accessibility-issues)
+  - [KME0008: Invalid Kubernetes Version](#kme0008-invalid-kubernetes-version)
+  - [KME0009: Redefined Key in Plugin Configuration](#kme0009-redefined-key-in-plugin-configuration)
+  - [KME0010: Redefined Associations in Package Configuration](#kme0010-redefined-associations-in-package-configuration)
+  - [KME0011: Redefined Key in Third-Party Configuration](#kme0011-redefined-key-in-third-party-configuration)
+  - [KME0012: Procedure Restricted by OS Family Compatibility](#kme0012-procedure-restricted-by-os-family-compatibility)
+  - [KME0013: Redefined Key in Containerd Configuration](#kme0013-redefined-key-in-containerd-configuration)
+  - [KME0014: Invalid Helm Chart URL](#kme0014-invalid-helm-chart-url)
 - [Troubleshooting Tools](#troubleshooting-tools)
   - [etcdctl Script](#etcdctl-script)
 - [Troubleshooting Kubernetes Generic Issues](#troubleshooting-kubernetes-generic-issues)
@@ -38,6 +47,7 @@ This section provides troubleshooting information for Kubemarine and Kubernetes 
     - [Case 1](#case-1)
     - [Case 2](#case-2)
   - [Calico Generates High Amount of Logs and Consumes a lot of CPU](#calico-generates-high-amount-of-logs-and-consumes-a-lot-of-cpu) 
+  - [Calico 3.29.0 Leading to kubernetes Controller Manager GC Failures](#calico-3290-leading-to-kubernetes-controller-manager-gc-failures) 
 - [Troubleshooting Kubemarine](#troubleshooting-kubemarine)
   - [Operation not Permitted Error in Kubemarine Docker Run](#operation-not-permitted-error-in-kubemarine-docker-run)
   - [Failures During Kubernetes Upgrade Procedure](#failures-during-kubernetes-upgrade-procedure)
@@ -46,7 +56,8 @@ This section provides troubleshooting information for Kubemarine and Kubernetes 
   - [Troubleshooting an Installation That Ended Incorrectly](#troubleshooting-an-installation-that-ended-incorrectly)
   - [Upgrade Procedure to v1.28.3 Fails on ETCD Step](#upgrade-procedure-to-v1283-fails-on-etcd-step)
   - [kubectl logs and kubectl exec fail](#kubectl-logs-and-kubectl-exec-fail)
-  - [OpenSSH server becomes unavailable during cluster installation on Centos9](#openssh-server-becomes-unavailable-during-cluster-installation-on-centos9)
+  - [OpenSSH server becomes unavailable during cluster installation on Centos 9](#openssh-server-becomes-unavailable-during-cluster-installation-on-centos-9)
+  - [Packets Loss During the Transmission Between Nodes](#packets-loss-during-the-transmission-between-nodes)
 
 # Kubemarine Errors
 
@@ -93,9 +104,7 @@ Traceback (most recent call last):
 ValueError: max_workers must be greater than 0
 ```
 
-
-
-### How to solve
+### How to resolve
 1. Run the [IAAS checker](Kubecheck.md#iaas-procedure) and [PAAS checker](Kubecheck.md#paas-procedure) to identify potential issues with the nodes or the cluster.
 2. If the checker reports failed tests, fix the cause of the failure and rerun the task.
 3. Adjust the number of workers to ensure `max_workers` is greater than 0.
@@ -134,7 +143,7 @@ KME0002: Remote group exception
   bash: apt: command not found
 ```
 
-### How to solve
+### How to resolve
 1. Run the [IAAS checker](Kubecheck.md#iaas-procedure) and [PAAS checker](Kubecheck.md#paas-procedure) to ensure that the infrastructure and platform are functioning properly.
 2. Inspect the node where the error occurred. In our particular example, it is required to check the presence of the required package manager and install it if it is missing. 
 3. Verify that all necessary dependencies are correctly installed on the node, and reattempt the task.
@@ -171,7 +180,7 @@ KME0002: Remote group exception
   sleeping...
 ```
 
-### How to solve
+### How to resolve
 1. Inspect the remote node for potential issues causing the hang. This could include a malfunctioning hypervisor or a hung process.
 2. Reboot the hypervisor or node if it is not responding, or manually terminate any hanging processes.
 3. Check for SSH connectivity issues between the deployer node and the cluster, and verify the network stability.
@@ -203,7 +212,7 @@ FAILURE!
 KME0004: There are no control planes defined in the cluster scheme
 ```
 
-### How to solve
+### How to resolve
 1. Check the cluster's inventory file to ensure that there is at least one node assigned with the `control-plane` role.
 2. If no control plane nodes are defined, add new nodes with the `control-plane` role to the cluster inventory. 
    
@@ -257,7 +266,7 @@ TASK FAILED prepare.check.sudoer
 KME0005: ['10.101.1.1'] are not sudoers
 ```
 
-### How to solve
+### How to resolve
 1. Add the connection user to the sudoers group on the affected cluster nodes. For example, on Ubuntu, use the following command (note that a reboot is required):
    ```bash
    sudo adduser <username> sudo
@@ -274,6 +283,210 @@ KME0005: ['10.101.1.1'] are not sudoers
 To prevent this issue in the future:
 - Ensure all connection users are properly configured with sudo privileges on all nodes before running any procedures.
 - Regularly audit the sudoer configurations to avoid permission issues during deployments or node additions.
+
+## KME0006: Node Accessibility Issues
+
+### Description
+This error occurs when nodes are either offline or inaccessible through SSH during the cluster setup or runtime operations.
+
+### Alerts
+- **Alert:** Nodes not reachable or inaccessible through SSH.
+
+### Stack trace(s)
+Not applicable.
+
+### How to resolve
+1. For nodes reported as **offline**:
+   - Verify that the node addresses are correctly entered in the inventory.
+   - Ensure the nodes are powered on and reachable over the network.
+   - Check that the SSH port is open and correctly configured.
+   - Confirm that the SSH daemon is running and properly set up on the nodes.
+
+2. For nodes reported as **inaccessible**:
+   - Validate that the SSH credentials (keyfile, username, password) are correct in the inventory.
+   - Test the SSH connection manually to confirm access.
+
+### Recommendations
+- Test connectivity to all nodes using ping and SSH before initiating any cluster setup or updates.
+
+>**Note**  
+>If you resolve the problem, consider [opening a new PR](https://github.com/Netcracker/KubeMarine/pulls) to document your solution, which will help others in the community.
+
+
+## KME0008: Invalid Kubernetes Version
+
+### Description
+This error occurs when a specified Kubernetes version is not allowed for use. The selected version does not match the list of supported or allowed versions.
+
+### Alerts
+- **Alert:** Specified Kubernetes version is invalid or unsupported.
+
+### Stack trace(s)
+Not applicable.
+
+### How to resolve
+1. Verify the Kubernetes version specified in your configuration.
+2. Check the list of allowed versions provided in the error message: `{allowed_versions}`.
+3. Update your configuration to use one of the allowed Kubernetes versions.
+4. Re-run the task or setup process after correcting the version.
+
+### Recommendations
+- Before starting the setup, always refer to the official documentation or project configuration to identify supported Kubernetes versions.
+
+>**Note**  
+>If you resolve the problem, consider [opening a new PR](https://github.com/Netcracker/KubeMarine/pulls) to document your solution, which will help others in the community.
+
+
+## KME0009: Redefined Key in Plugin Configuration
+
+### Description
+This error occurs when a key in the plugin configuration is redefined in the `cluster.yaml` file but is missing in the procedure inventory. The mismatch indicates that the required plugin configuration is not explicitly specified in the procedure inventory.
+
+### Alerts
+- **Alert:** Key redefined in `cluster.yaml` but missing in the procedure inventory.
+
+### Stack trace(s)
+Not applicable.
+
+### How to resolve
+1. Identify the key in question.
+2. Verify the plugin name.
+3. Check the `cluster.yaml` file for the redefined key and review the changes in the procedure.yaml
+4. Update the procedure inventory to include the required plugin configuration explicitly.
+5. Re-run the process after ensuring consistency between the `cluster.yaml` and procedure.yaml files.
+
+### Recommendations
+- Maintain a consistent plugin configuration between `cluster.yaml` and the procedure inventory files.
+- Before making changes, review the plugin configuration schema and ensure all required keys are explicitly defined in both files.
+
+>**Note**  
+>If you resolve the problem, consider [opening a new PR](https://github.com/Netcracker/KubeMarine/pulls) to document your solution, which will help others in the community.
+
+## KME0010: Redefined Associations in Package Configuration
+
+### Description
+This error occurs when associations for a package are redefined in the `cluster.yaml` file but are missing in the procedure inventory. The inconsistency indicates that the required associations are not explicitly specified in the procedure inventory.
+
+### Alerts
+- **Alert:** Associations redefined in `cluster.yaml` but missing in the procedure inventory.
+
+### Stack trace(s)
+Not applicable.
+
+### How to resolve
+1. Identify the package in question.
+2. Check the `cluster.yaml` file for the redefined associations and review the changes in the procedure.yaml
+3. Update the procedure inventory to include the required associations explicitly for the package.
+4. Ensure the associations are consistent between the `cluster.yaml` and procedure inventory files.
+5. Re-run the process after making the necessary updates.
+
+### Recommendations
+- Always maintain consistency in package associations between `cluster.yaml` and procedure inventory files.
+- Regularly validate that all required associations are explicitly defined in the procedure inventory.
+
+>**Note**  
+>If you resolve the problem, consider [opening a new PR](https://github.com/Netcracker/KubeMarine/pulls) to document your solution, which will help others in the community.
+
+
+## KME0011: Redefined Key in Third-Party Configuration
+
+### Description
+This error occurs when a key in the third-party configuration is redefined in the `cluster.yaml` file but is missing in the procedure inventory. This inconsistency indicates that the required third-party configuration is not explicitly specified in the procedure inventory.
+
+### Alerts
+- **Alert:** Key redefined in `cluster.yaml` for a third-party component but missing in the procedure inventory.
+
+### Stack trace(s)
+Not applicable.
+
+### How to resolve
+1. Identify the key in question.
+2. Verify the third-party component name.
+3. Check the `cluster.yaml` file for the redefined key and review the changes in the procedure.yaml
+4. Update the procedure inventory to include the required third-party configuration explicitly.
+5. Ensure consistency between the `cluster.yaml` and procedure inventory files for the third-party configuration.
+6. Re-run the process after making the necessary updates.
+
+### Recommendations
+- Always ensure that third-party configurations are explicitly defined in the procedure inventory to avoid inconsistencies.
+- Regularly validate third-party configurations between `cluster.yaml` and procedure inventory files.
+
+>**Note**  
+>If you resolve the problem, consider [opening a new PR](https://github.com/Netcracker/KubeMarine/pulls) to document your solution, which will help others in the community.
+
+## KME0012: Procedure Restricted by OS Family Compatibility
+
+### Description
+This error occurs when a procedure is attempted on a cluster where nodes do not all share the same and supported OS family. The procedure requires uniformity in the OS family across all nodes in the cluster.
+
+### Alerts
+- **Alert:** Procedure is not possible due to incompatible OS families across cluster nodes.
+
+### Stack trace(s)
+Not applicable.
+
+### How to resolve
+1. Verify the OS family of each node in the cluster.
+   - Ensure all nodes have the same OS family.
+   - Confirm that the OS family is supported for the procedure.
+2. Update the nodes to use a consistent and supported OS family.
+3. Retry the procedure after ensuring OS family uniformity.
+
+### Recommendations
+- Standardize the OS family across all nodes in the cluster before starting any procedure to avoid compatibility issues.
+
+>**Note**  
+>If you resolve the problem, consider [opening a new PR](https://github.com/Netcracker/KubeMarine/pulls) to document your solution, which will help others in the community.
+
+
+## KME0013: Redefined Key in Containerd Configuration
+
+### Description
+This error occurs when the `sandbox_image` key for the `containerdConfig` plugin is redefined in the `cluster.yaml` file but is missing in the procedure inventory. This indicates that the required `sandbox_image` configuration is not explicitly specified in the procedure inventory.
+
+### Alerts
+- **Alert:** Key `'plugins."io.containerd.grpc.v1.cri".sandbox_image'` redefined in `cluster.yaml` but missing in procedure inventory.
+
+### Stack trace(s)
+Not applicable.
+
+### How to resolve
+1. Identify the key in question: `'plugins."io.containerd.grpc.v1.cri".sandbox_image'`.
+2. Verify the plugin configuration for `containerdConfig` in the `cluster.yaml` file.
+3. Update the procedure inventory to explicitly include the `sandbox_image` key for the `containerdConfig` plugin.
+4. Ensure consistency between the `cluster.yaml` and procedure inventory files for the `sandbox_image` configuration.
+5. Re-run the process after making the necessary updates.
+
+### Recommendations
+- Ensure that all necessary keys, including `sandbox_image`, are explicitly defined in the procedure inventory to avoid configuration issues.
+
+>**Note**  
+>If you resolve the problem, consider [opening a new PR](https://github.com/Netcracker/KubeMarine/pulls) to document your solution, which will help others in the community.
+
+## KME0014: Invalid Helm Chart URL
+
+### Description
+This error occurs when the provided Helm chart URL does not return the expected content type in the specified file. If the URL is pointing to a private repository, the correct authentication may be missing.
+
+### Alerts
+- **Alert:** Helm chart URL does not return the expected content.
+
+### Stack trace(s)
+Not applicable.
+
+### How to resolve
+1. Verify the Helm chart URL.
+2. Ensure the URL returns the correct content type in the file located at destination.
+3. If the repository is private, check that the correct authentication (such as a token or credentials) is provided.
+4. Test the URL manually to confirm it is accessible and returning the expected content.
+5. Re-run the procedure after validating the URL and authentication.
+
+### Recommendations
+- Always verify the Helm chart URL before using it in your configuration.
+- Ensure proper authentication is provided for private repositories to avoid access issues.
+
+>**Note**  
+>If you resolve the problem, consider [opening a new PR](https://github.com/Netcracker/KubeMarine/pulls) to document your solution, which will help others in the community.
 
 # Troubleshooting Tools
 
@@ -322,7 +535,7 @@ CoreDNS may respond with delays when there is a high load due to a large volume 
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 1. Increase the number of CoreDNS replicas to handle the higher load. Use the following command to scale up the replicas:
    ```bash
    kubectl scale deployments.apps -n kube-system coredns --replicas=4
@@ -349,7 +562,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The issue occurs due to the presence of non-deleted finalizers in the `CustomResource`. These finalizers prevent the resource from being deleted, typically because the controller responsible for managing the `CustomResource` is not operational (e.g., if the controller is deleted or unavailable).
 
 There are two potential solutions:
@@ -389,7 +602,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The default Kubernetes installation uses the Calico network plugin with IP-in-IP (ipip) mode set to CrossSubnet. In this configuration, packets between pods on nodes in the same network are sent directly, but packets between pods on nodes in different networks are routed through a tunnel. According to the [Calico documentation](https://docs.projectcalico.org/networking/mtu), the MTU on Calico tunnel interfaces should be 20 bytes less than the MTU on the main network interface.
 
 To adjust the MTU size, run the following command on any control-plane node:
@@ -428,7 +641,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 This issue occurs when you attempt to apply a resource with a large configuration. The error happens because `kubectl apply` tries to save the new configuration to the `kubectl.kubernetes.io/last-applied-configuration` annotation. If the new configuration is too large, it exceeds the annotation's size limit, and `kubectl apply` cannot proceed. The maximum size of annotations cannot be changed, so large resources cannot be applied using `kubectl apply`.
 
 To resolve this issue, use `kubectl create` instead of `kubectl apply` for large resources.
@@ -452,7 +665,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The root cause of this issue is the low rate limit for the `kube-apiserver`. To fix it, increase the rate limits by adjusting the `--max-requests-inflight` and `--max-mutating-requests-inflight` options in the `kube-apiserver` configuration:
 - `--max-requests-inflight`: Defines the maximum number of non-mutating requests. The default value is 400.
 - `--max-mutating-requests-inflight`: Defines the maximum number of mutating requests. The default value is 200.
@@ -495,7 +708,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The root cause of this issue is the series of timeouts and delays that occur when Kubernetes detects an offline node. Kubernetes first takes time to discover that a node is unavailable (up to 10 seconds). It then waits for the node to either recover or time out (40 seconds), and finally, it marks the pods on that node for deletion and waits another 5 minutes before redeploying them to healthy nodes.
 
 To reduce this recovery time, you can adjust the following variables:
@@ -544,7 +757,7 @@ E0402 10:52:00.858600 8 garbagecollector.go:233] timed out waiting for dependenc
 I0402 10:52:00.883519 8 graph_builder.go:272] garbage controller monitor not yet synced 
 ```
 
-### How to solve
+### How to resolve
 The root cause of this issue may be related to etcd I/O performance and a lack of CPU resources for both `kube-apiserver` and etcd. High CPU resource usage by the Kubernetes API affects the control-plane API, the etcd cluster, and the garbage collector's ability to sync.
 
 To resolve this issue, you have two options:
@@ -574,7 +787,7 @@ etcdserver: mvcc: database space exceeded
 etcdserver: no space
 ```
 
-### How to solve
+### How to resolve
 The root cause of this issue is fragmented space left after the compaction procedure. While this space is available for etcd, it is not available to the host filesystem. You must defragment the etcd database to make this space available to the filesystem.
 
 Compaction is performed automatically every 5 minutes, and this interval can be adjusted using the `--etcd-compaction-interval` flag for the `kube-apiserver`.
@@ -610,7 +823,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The root cause of this issue is the default timeout for short-running commands, which is 5 seconds. This timeout may not be enough for defragmentation.
 
 To resolve this issue, use the `--command-timeout` flag to increase the timeout when running the defrag command:
@@ -642,7 +855,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The root cause is that the etcd database processes requests too slowly. To improve etcd performance, first check that the disk under `/var/lib/etcd` meets the performance recommendations outlined in [the etcd documentation](https://etcd.io/docs/v3.5/tuning/).
 
 Then, adjust the following settings in the `/etc/kubernetes/manifests/etcd.yaml` manifest on all control-plane nodes:
@@ -680,7 +893,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The root cause of the issue is a corrupted etcd database. 
 
 If you have a relevant backup created by the [`kubemarine backup`](/documentation/Maintenance.md#backup-procedure) procedure and it is suitable to restore the whole Kubernetes cluster, you can use the [`kubemarine restore`](/documentation/Maintenance.md#restore-procedure) procedure.
@@ -703,7 +916,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 #### Manual Etcd Restoration from a Snapshot
 
 The community recommends to use snapshots to restore etcd database.
@@ -797,7 +1010,7 @@ cp-node-1=http://192.168.0.10:2380,cp-node-2=http://192.168.0.11:2380,cp-node-3=
 # kubectl get nodes
 ```
 
-10. If necessary, remove backup files created at the step 2.
+10. If necessary, remove the backup files created at the step 2.
 
 
 #### Manual Etcd Restoration without a Snapshot
@@ -940,7 +1153,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The root cause of the issue is that `ingress-nginx-controller` does not support all ciphers from TLSv1.2 and TLSv1.3 by default. The default list of ciphers is embedded in the `ingress-nginx-controller` image in the `/etc/nginx/nginx.conf` file. These settings can be customized during the installation process by modifying the `config_map` section, as described in the [nginx-ingress-controller plugin documentation](https://github.com/Netcracker/KubeMarine/blob/main/documentation/Installation.md#nginx-ingress-controller).
 
 To resolve this issue, update the `Ingress` resource by adding an annotation that manages the list of supported ciphers. The following example adds the `AES128-SHA256` cipher, which is not supported by default:
@@ -978,7 +1191,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The root cause of this issue is a broken converter webhook associated with a Custom Resource Definition (CRD). This prevents the garbage collector (GC) controller from initializing due to a failure during the informer sync process. The issue remains hidden until the GC controller restarts, as CRDs with non-working converter webhooks do not affect ongoing GC operations but break GC initialization.
 
 This is a known issue in the Kubernetes community (see [GitHub issue](https://github.com/kubernetes/kubernetes/issues/101078)), but no fix has been implemented yet.
@@ -1017,7 +1230,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 To resolve the issue, add the following parameter to the `/etc/sysctl.conf` file:
 ```bash
 fs.may_detach_mounts=1
@@ -1044,7 +1257,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The root cause of this issue is a network policy applied at the infrastructure level that blocks traffic for the `podSubnet` and/or `serviceSubnet` on the nodes' ports.
 
 To resolve the issue, ensure that the [prerequisites](/documentation/Installation.md#prerequisites-for-cluster-nodes) for `podSubnet` and `serviceSubnet` are properly configured.
@@ -1083,7 +1296,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The root cause of this issue is a known problem with the Linux kernel version `5.4.0-132-generic`, which affects the Container Runtime Interface (CRI).
 
 To resolve the issue, upgrade the Linux kernel to `5.4.0-135-generic`.
@@ -1109,7 +1322,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The root cause is that, by default, kubelet pulls images sequentially, one by one. A slow image pull can delay all other image pulls on the node.
 
 To resolve the issue, add the following parameter to the kubelet configuration to allow parallel image pulls:
@@ -1137,7 +1350,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The root cause is that not all Calico BGP sessions between nodes are established due to incorrect network interface selection. By default, Calico uses the `first-found` method, which selects the first valid IP address on the first network interface to route traffic between nodes. This approach works for nodes with a single Ethernet interface but may cause issues in cases where multiple interfaces are present.
 
 To resolve this, specify the correct network interface for Calico in the `IP_AUTODETECTION_METHOD` variable. For example:
@@ -1168,7 +1381,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The root cause is that not all Calico BGP sessions between nodes are established due to different CIDR notations on the chosen IPs for nodes. This issue often occurs in setups where the balancer role is combined with other roles, such as with VRRP, where Calico may autodetect the VRRP IP instead of the node's internal IP.
 
 You can use `calicoctl` to inspect this situation. For example, in a Mini-HA cluster, the output may look like this:
@@ -1214,7 +1427,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The root cause of this issue is that in clusters with a large number of ingresses, the admission webhook may take too long to test a new configuration, exceeding the timeout.
 
 There are two ways to resolve this issue:
@@ -1275,7 +1488,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 1. **Check if the vIP address is unreachable**:
    Verify connectivity to the Kubernetes API via the vIP address:
    ```bash
@@ -1365,7 +1578,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The root cause of this issue is that images using the `busybox` utility, which provides the `nslookup` command, can have issues handling the `search` directives in `/etc/resolv.conf`.
 
 To resolve the issue, use the Fully Qualified Domain Name (FQDN) instead of the short name. For example, use `kubernetes.default.svc.cluster.local` instead of `kubernetes.default`.
@@ -1393,7 +1606,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The root cause of this issue is that traffic from the node network to the pod network is blocked for UDP port 53, which is required for DNS resolution.
 
 To resolve the issue, update the cloud provider configuration to allow traffic between the node and pod networks, specifically for UDP port 53.
@@ -1420,7 +1633,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The root cause is an internal issue with the `Audit` daemon. To resolve this, either change the configuration of the `Audit` daemon or disable it entirely.
 
 ### Recommendations
@@ -1444,7 +1657,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 As WA XDP acceleration can be turned off by adding the following parameter:
 
 #### Manualy
@@ -1476,6 +1689,61 @@ And run `kubemarine install --tasks=deploy.plugins`
 
 Pods should stop generating such amount of logs and resource consumption should normalize.
 
+
+## Calico 3.29.0 Leading to kubernetes Controller Manager GC Failures
+
+### Description
+
+On Calico versions 3.29.0 and 3.29.1, the Kubernetes garbage collector is not deleting objects with ownerReferences because it fails to build the dependency graph.
+Such logs can be found in kube-controller-manager pod:
+
+```bash
+E0508 08:05:31.194320       1 shared_informer.go:316] unable to sync caches for garbage collector
+E0508 08:05:31.194365       1 garbagecollector.go:268] timed out waiting for dependency graph builder sync during GC sync (attempt 9425) 
+```
+
+### Alerts
+Not applicable.
+
+### Stack trace(s)
+Not applicable.
+
+### How to resolve
+Root cause of the issue is the garbage collector cannot proceed because it is unable to list or watch `tier.[global]networkpolicies.projectcalico.org`, which prevents it from syncing its internal cache.
+
+The best way to resolve this issue is to upgrade Calico to a newer version. However, the following workaround is also applicable:
+
+Create the necessary `RBAC` permissions to allow kube-controller-manager to read `tier.[global]networkpolicies.projectcalico.org` resources.
+
+```yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: tier-default-reader
+rules:
+  - apiGroups: ['projectcalico.org']
+    resources: ['tiers']
+    resourceNames: ['default']
+    verbs: ['get']
+  - apiGroups: ['projectcalico.org']
+    resources: ['tier.networkpolicies']
+    resourceNames: ['default.*']
+    verbs: ['get', 'list']
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kube-controller-manager-tier-reader
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: tier-default-reader
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: system:kube-controller-manager
+```
+
 # Troubleshooting Kubemarine
 
 This section provides troubleshooting information for Kubemarine-specific or installation-specific issues.
@@ -1491,7 +1759,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The root cause of this issue is incompatibility between the Docker version and the Kubemarine base [image version](/Dockerfile#L1). Kubemarine uses system calls that are not allowed by default in Docker, causing the failure.
 
 To fix this issue:
@@ -1532,7 +1800,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The root cause of this issue is any error that occurs during the `upgrade` procedure, leading to its failure. 
 
 To resolve the issue:
@@ -1562,7 +1830,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The root cause of the issue is that draining a pod would violate the PDB rules configured by an application.
 
 To resolve this issue:
@@ -1586,7 +1854,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The root cause of this issue is a pod that is stuck in the "Terminating" status. There can be various reasons for this behavior, so it's important to check the pod events for more details. To proceed with the upgrade, the "Terminating" pod needs to be deleted.
 
 To resolve the issue, follow these steps:
@@ -1615,7 +1883,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The root cause of this issue is that the etcd configuration is re-generated by kubeadm during the upgrade using data from the `kubeadm-config` config map in the `kube-system` namespace. If your customizations are not present in this config map or in `cluster.yaml`, they will be missing after the upgrade.
 
 To resolve this issue:
@@ -1660,7 +1928,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The root cause of this issue is that the kubeadm cluster configuration is not automatically updated by `kubemarine` during the upgrade process. Specifically, `kubemarine` does not provide a way to change the Kubernetes image repository automatically during an upgrade.
 
 To resolve this issue, you must manually update the image repository in the kubeadm configuration and the container runtime configuration. You must also modify the `cluster.yaml` file to reflect these changes.
@@ -1710,7 +1978,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The root cause of this issue is that the Kubernetes garbage collector only cleans up unused images and containers located under `/var/lib/docker`. It initiates cleanup when disk usage reaches the `image-gc-high-threshold` (default is 85%). Pods are evicted due to DiskPressure when the free disk space is less than `imagefs.available` (default is 15%).
 
 If non-container files occupy the disk space and the garbage collector cannot free enough space, this error may occur.
@@ -1748,7 +2016,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The root cause is that `kubeadm v1.28.0` adds default fields that are incompatible with `kubeadm v1.28.3`. To resolve this issue:
 
 1. **Remove the following parts from the `etcd.yaml` manifest** on each control plane node in the cluster, one by one. The lines to remove are marked by `-`:
@@ -1840,7 +2108,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 The root cause of the issue is the addition of new rules to `audit.rules` due to the update of the default.yaml configuration file. The default audit settings in Linux operating systems involve two files: `auditd.conf` and `audit.rules`. For example, the following rules have been added:
 
 ```text
@@ -1901,7 +2169,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 To avoid potential problems, if the operating system has just been installed on a VM, it is recommended to **wait approximately 10 minutes** before starting any `Kubemarine` procedures. This ensures that the `cloud-init` service has completed its initial setup.
 
 You can check the current status of `cloud-init` and ensure it has finished its preparations using the following command:
@@ -1928,7 +2196,7 @@ Not applicable.
 ### Stack trace(s)
 Not applicable.
 
-### How to solve
+### How to resolve
 
 To analyze the situation:
 1. After entering the node, navigate to the path `/etc/kubemarine/kube_tasks`, where you will find logs that were collected during the installation process.
@@ -1971,7 +2239,7 @@ $ kubectl -n my-namespace exec my-pod -- id
 Error from server: error dialing backend: remote error: tls: internal error
 ```
 
-### How to solve
+### How to resolve
 1. Perform the Certificate Signing Request (CSR) approval process by following the steps outlined in the maintenance guide.
 2. Refer to the [Kubelet Server Certificate Approval](https://github.com/Netcracker/KubeMarine/blob/main/documentation/internal/Hardening.md#kubelet-server-certificate-approval) section for detailed instructions on how to approve the kubelet server certificate.
 
@@ -1980,10 +2248,10 @@ Ensure that the cluster's certificate management process is aligned with the sec
 
 **Note**: Not applicable.
 
-## OpenSSH server becomes unavailable during cluster installation on Centos9
+## OpenSSH server becomes unavailable during cluster installation on Centos 9
 
 ### Description
-During cluster installation on Centos9, the OpenSSH server becomes unavailable, leading to a failure in the installation process at the `kubemarine.system.reboot_nodes` stage. This issue is caused by a version mismatch between OpenSSL and OpenSSH, which results in OpenSSH being unable to start.
+During cluster installation on Centos9 or Oracle Linux 9, the OpenSSH server becomes unavailable, leading to a failure in the installation process at the `kubemarine.system.reboot_nodes` stage. This issue is caused by a version mismatch between OpenSSL and OpenSSH, which results in OpenSSH being unable to start.
 
 ### Alerts
 Not applicable.
@@ -1996,7 +2264,7 @@ sshd.service: Failed with result 'exit-code'.
 Failed to start OpenSSH server daemon.
 ```
 
-### How to solve
+### How to resolve
 1. To resolve this issue, update the OpenSSH server to ensure compatibility with the updated OpenSSL version.
 2. Add the following upgrade section to the **cluster.yaml** file:
    ```yaml
@@ -2011,5 +2279,24 @@ Failed to start OpenSSH server daemon.
 ### Recommendations
 - Ensure that critical services such as OpenSSH are upgraded when their dependencies, like OpenSSL, are updated.
 - Test updates in a staging environment to catch compatibility issues before deployment.
+
+**Note**: Not applicable.
+
+## Packets loss during the transmission between nodes
+
+### Description
+Packets are lost during the transmission between nodes that are located in different subnets. It appears in retries of TCP sessions or inability to get the UDP packets in case of high network load. The root cause is in the IaaS level routers performance. Basically, routing works slower than switching.
+
+### Alerts
+Not applicable.
+
+### Stack trace(s)
+Not applicable.
+
+### How to resolve
+Reschedule the pods in cluster to displace the pods that create the significant network load to the nodes in the same subnet OR move all of the nodes in the cluster in the same subnet
+
+### Recommendations
+- Avoid routing between nodes in the same cluster in case of high network load
 
 **Note**: Not applicable.

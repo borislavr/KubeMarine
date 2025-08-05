@@ -16,6 +16,8 @@ import io
 import math
 import os
 import time
+import re
+import json
 from contextlib import contextmanager
 from typing import List, Dict, Iterator, Any, Optional
 
@@ -23,7 +25,7 @@ import yaml
 from jinja2 import Template
 from ordered_set import OrderedSet
 
-from kubemarine import system, admission, etcd, packages, jinja, sysctl
+from kubemarine import system, admission, etcd, packages, jinja, sysctl, thirdparties
 from kubemarine.core import utils, static, summary, log, errors
 from kubemarine.core.cluster import KubernetesCluster, EnrichmentStage, enrichment
 from kubemarine.core.executor import Token
@@ -531,13 +533,34 @@ def init_first_control_plane(group: NodeGroup) -> None:
     # Remove default resolvConf from kubelet-config ConfigMap for debian OS family
     first_control_plane.call(components.patch_kubelet_configmap)
 
-    # Preparing join_dict to init other nodes
-    control_plane_lines = list(result.values())[0].stdout. \
-                       split("You can now join any number of the control-plane")[1].splitlines()[2:5]
-    worker_lines = list(result.values())[0].stdout. \
-                       split("Then you can join any number of worker")[1].splitlines()[2:4]
-    control_plane_join_command = " ".join([x.replace("\\", "").strip() for x in control_plane_lines])
-    worker_join_command = " ".join([x.replace("\\", "").strip() for x in worker_lines])
+    stdout_output = list(result.values())[0].stdout
+
+    # regex patterns for variations in msg for kubeadm init command
+    control_plane_pattern = (
+    r"You can now join any number of (?:the )?control-plane node[s]?.*?"
+    r"(\n\s+kubeadm join[^\n]+(?:\n\s+--[^\n]+)*)"
+    )
+    worker_pattern = r"Then you can join any number of worker nodes.*?(\n\s+kubeadm join[^\n]+(?:\n\s+--[^\n]+)*)"
+
+    control_plane_match = re.search(control_plane_pattern, stdout_output, re.DOTALL)
+    if control_plane_match:
+        control_plane_lines = control_plane_match.group(1).splitlines()
+        control_plane_lines = [line.strip() for line in control_plane_lines if line.strip()]
+        if not control_plane_lines:
+            raise ValueError("Extracted control-plane join command block is empty")
+        control_plane_join_command = " ".join(control_plane_lines).replace("\\", "").strip()
+    else:
+        raise ValueError("Failed to extract control-plane join command from kubeadm output")
+
+    worker_match = re.search(worker_pattern, stdout_output, re.DOTALL)
+    if worker_match:
+        worker_lines = worker_match.group(1).splitlines()
+        worker_lines = [line.strip() for line in worker_lines if line.strip()]
+        if not worker_lines:
+            raise ValueError("Extracted worker join command block is empty")
+        worker_join_command = " ".join(worker_lines).replace("\\", "").strip()
+    else:
+        raise ValueError("Failed to extract worker join command from kubeadm output")
 
     # TODO: Get rid of this code and use get_join_dict() method
     args = control_plane_join_command.split("--")
@@ -731,6 +754,7 @@ def upgrade_first_control_plane(upgrade_group: NodeGroup, cluster: KubernetesClu
     drain_cmd = prepare_drain_command(cluster, node_name, **drain_kwargs)
     first_control_plane.sudo(drain_cmd, hide=False, pty=True)
 
+    thirdparties.install_thirdparty(first_control_plane, "/usr/bin/kubelet")
     upgrade_cri_if_required(first_control_plane)
     fix_flag_kubelet(first_control_plane)
 
@@ -766,6 +790,7 @@ def upgrade_other_control_planes(upgrade_group: NodeGroup, cluster: KubernetesCl
             drain_cmd = prepare_drain_command(cluster, node_name, **drain_kwargs)
             node.sudo(drain_cmd, hide=False, pty=True)
 
+            thirdparties.install_thirdparty(node, "/usr/bin/kubelet")
             upgrade_cri_if_required(node)
             fix_flag_kubelet(node)
 
@@ -801,6 +826,7 @@ def upgrade_workers(upgrade_group: NodeGroup, cluster: KubernetesCluster, **drai
         drain_cmd = prepare_drain_command(cluster, node_name, **drain_kwargs)
         first_control_plane.sudo(drain_cmd, hide=False, pty=True)
 
+        thirdparties.install_thirdparty(node, "/usr/bin/kubelet")        
         upgrade_cri_if_required(node)
         fix_flag_kubelet(node)
 
@@ -841,12 +867,35 @@ def upgrade_cri_if_required(group: NodeGroup) -> None:
     log = cluster.log
 
     if 'containerd' in cluster.context["upgrade"]["required"]['packages']:
-        cri_packages = cluster.get_package_association_for_node(group.get_host(), 'containerd', 'package_name')
+        # stop kubelet during containerd upgrade so that it does not interfere
+        log.debug(f"Containerd will be upgraded on node: {group.get_node_name()}")
+        log.debug(f"Stopping kubelet on node: {group.get_node_name()}")
+        group.sudo("systemctl stop kubelet")
 
+        # Before upgrade, remove all pod sandboxes on the old containerd version.
+        # This is required, because containerd upgrade may break old pods.
+        # To support AIO clusters, we remove pods in two steps:
+        # 1. First we remove pods which use calico CNI (e.g. nginx), because
+        #       removal of such pods under the hood requires an API call to kube-api
+        #       to remove pod network (for calico CNI at least).
+        # 2. Then we remove pods which use only host network (e.g. kube-api, calico),
+        #       because these pods do not need API calls to kube-api to remove pod network.
+        # For proper cleanup, it is important to remove pods, not just containers.
+        log.debug(f"Restarting all containers on node: {group.get_node_name()}")
+        group.run("for pod in $(sudo crictl pods -q); do " 
+                        "sudo crictl inspectp $pod | " 
+                        "grep '\"network\": \"NODE\"' > /dev/null || " 
+                        "sudo crictl rmp -f $pod; " 
+                  "done", warn=True)
+        group.sudo("crictl rmp -fa", warn=True)
+
+        # upgrade containerd after all pod sandboxes are removed
+        cri_packages = cluster.get_package_association_for_node(group.get_host(), 'containerd', 'package_name')
         log.debug(f"Installing {cri_packages} on node: {group.get_node_name()}")
         packages.install(group, include=cri_packages, pty=True)
-        log.debug(f"Restarting all containers on node: {group.get_node_name()}")
-        group.sudo("crictl rm -fa", warn=True)
+
+        log.debug(f"Starting kubelet on node: {group.get_node_name()}")
+        group.sudo("systemctl start kubelet")
     else:
         log.debug("'containerd' package upgrade is not required")
 
