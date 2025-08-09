@@ -65,7 +65,7 @@ mypy = [
     "types-pyinstaller==6.6.0.*",
 ]
 pylint = [
-    "pylint==3.1.*"
+    "pylint==3.3.*"
 ]
 
 # Auxiliary executable roughly equivalent to python -m kubemarine
