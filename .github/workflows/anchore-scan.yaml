@@ -34,7 +34,7 @@ jobs:
       - name: grype / sarif to markdown
         if: success() || failure()
         id: sarif-to-markdown
-        uses: 11notes/action-sarif-to-markdown@v1.0.0
+        uses: 11notes/action-sarif-to-markdown@v1.2.0
         with:
           sarif_file: output.sarif
 
