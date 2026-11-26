@@ -1,0 +1,3 @@
+{
+  "extends": ["github>borislavr/renovate-config","github>borislavr/renovate-config:alpine"]
+}
